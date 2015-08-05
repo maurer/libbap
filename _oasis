@@ -4,11 +4,14 @@ Version:     0
 Synopsis:    C bindings to BAP
 Authors:     Matthew Maurer <matthew.r.maurer@gmail.com>
 License:     MIT
-Plugins:     META (0.4), DevFiles (0.4)
+Plugins:     DevFiles (0.4)
+XDevFilesMakefileNoTargets: install
 
 Library libbap
   Path:       lib
   BuildTools: ocamlbuild
   Modules:    Libbap
+  CSources:   libbapwrap.c
+  CompiledObject: native
   BuildDepends: core_kernel,
                 bap
