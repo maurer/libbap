@@ -25,8 +25,13 @@ int main() {
   mem mem = create_mem(0, sizeof(shellcode), BAP_LITTLE_ENDIAN, addr0, bs_shellcode);
   free_bitvector(addr0);
   char* mem_str = mem_to_string(mem);
-  free_mem(mem);
   printf("%s", mem_str);
   free(mem_str);
+  disasm d = disasm_mem(NULL, BAP_X86, mem);
+  free_mem(mem);
+  char* disas_str = disasm_to_string(d);
+  free_disasm(d);
+  printf("%s", disas_str);
+  free(disas_str);
   return 0;
 }

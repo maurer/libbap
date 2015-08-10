@@ -28,34 +28,9 @@ typedef bitvector bap_addr;
 
 //C-mode types
 typedef enum {
-  BAP_AARCH64,
-  BAP_AARCH64_BE,
-  BAP_ARM,
-  BAP_ARMEB,
-  BAP_ARMV4,
-  BAP_ARMV4T,
-  BAP_ARMV5,
-  BAP_ARMV6,
-  BAP_ARMV7,
-  BAP_HEXAGON,
-  BAP_MIPS,
-  BAP_MIPS64,
-  BAP_MIPS64EL,
-  BAP_MIPSEL,
-  BAP_NVPTX,
-  BAP_NVPTX64,
-  BAP_PPC,
-  BAP_PPC64,
-  BAP_PPC64LE,
-  BAP_R600,
-  BAP_SPARC,
-  BAP_SPARCV9,
-  BAP_SYSTEMZ,
-  BAP_THUMB,
-  BAP_THUMBEB,
-  BAP_X86,
-  BAP_X86_64,
-  BAP_XCORE
+  BAP_ARM = 0x93fcb9,
+  BAP_X86 = 0xb67eed,
+  BAP_X86_64 = 0xba7b274f,
 } bap_arch;
 
 typedef enum {
@@ -73,7 +48,7 @@ typedef enum {
   caml_##name = caml_named_value(#name);\
   assert(caml_##name != NULL);\
   caml_register_global_root(caml_##name);
-
+char*     disasm_to_string(disasm);
 bitvector bitvector_of_int64(int64_t val, int8_t width);
 char*     bitvector_to_string(bitvector);
 bigstring create_bigstring(off_t start, size_t len, char* buf);
@@ -81,3 +56,4 @@ size_t    bigstring_to_buf(bigstring, char*, size_t);
 mem       create_mem(off_t pos, size_t len, bap_endian endian, bap_addr addr,
 		     bigstring buf);
 char*     mem_to_string(mem);
+disasm disasm_mem(bap_addr* roots, bap_arch arch, mem mem);

@@ -13,6 +13,7 @@ NAMED_FUNC(bitvector_of_int64)
 NAMED_FUNC(bitvector_to_string)
 NAMED_FUNC(bigstring_to_string)
 NAMED_FUNC(mem_to_string)
+NAMED_FUNC(disasm_to_string)
 
 static char* argv[] = { NULL };
 
@@ -25,6 +26,7 @@ void libbap_init() {
   LOAD_FUNC(bitvector_to_string)
   LOAD_FUNC(bigstring_to_string)
   LOAD_FUNC(mem_to_string)
+  LOAD_FUNC(disasm_to_string)
 }
 
 bigstring create_bigstring(off_t pos, size_t len, char* buf) {
@@ -50,6 +52,10 @@ char* mem_to_string(mem mem) {
   return strdup(String_val(caml_callback(*caml_mem_to_string, *mem)));
 }
 
+char* disasm_to_string(disasm d) {
+  return strdup(String_val(caml_callback(*caml_disasm_to_string, *d)));
+}
+
 size_t bigstring_to_buf(bigstring bv, char* buf, size_t buf_size) {
   value caml_buf = caml_callback(*caml_bigstring_to_string, *bv);
   size_t caml_buf_len = caml_string_length(caml_buf);
@@ -64,9 +70,19 @@ mem create_mem(off_t pos, size_t len, bap_endian endian, bap_addr addr,
   return alloc_mem(caml_callbackN(*caml_mem_create, 5, args));
 }
 
-disasm disasm_mem(bap_addr* roots, size_t num_addrs, bap_arch arch, mem mem) {
-  //TODO actually load roots
-  value roots_list = Val_emptylist;
+char* dummy_roots[] = {NULL};
+
+value id(value v) {
+  return v;
+}
+
+disasm disasm_mem(bap_addr* roots, bap_arch arch, mem mem) {
+  value roots_arr;
+  if (roots) {
+    roots_arr = caml_alloc_array(id, roots);
+  } else {
+    roots_arr = caml_alloc_array(id, dummy_roots);
+  }
   return alloc_disasm(caml_callback3(*caml_disassemble_mem,
-                                     roots_list, arch, *mem));
+                                     roots_arr, arch, *mem));
 }

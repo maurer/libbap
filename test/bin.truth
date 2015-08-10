@@ -3,3 +3,14 @@ foo
 bar
 00000000  31 C0 50 68 2F 2F 73 68 68 2F 62 69 6E 89 E3 50 |1.Ph//shh/bin..P|
 00000010  53 89 E1 99 B0 0B CD 80 00                      |S........       |
+; XOR32rr(xorl %eax, %eaxEAX,EAX,EAX)
+; PUSH32r(pushl %eaxEAX)
+; PUSHi32(pushl $0x68732f2f0x68732f2f)
+; PUSHi32(pushl $0x6e69622f0x6e69622f)
+; MOV32rr(movl %esp, %ebxEBX,ESP)
+; PUSH32r(pushl %eaxEAX)
+; PUSH32r(pushl %ebxEBX)
+; MOV32rr(movl %esp, %ecxECX,ESP)
+cltd; CDQ()
+; MOV8ri(movb $0xb, %alAL,0xb)
+; INT(int $-0x80-0x80)
