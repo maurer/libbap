@@ -30,8 +30,20 @@ int main() {
   disasm d = disasm_mem(NULL, BAP_X86, mem);
   free_mem(mem);
   char* disas_str = disasm_to_string(d);
-  free_disasm(d);
   printf("%s", disas_str);
   free(disas_str);
+  bap_disasm_insn** insns = disasm_insns(d);
+  bap_disasm_insn** cur;
+  for (cur = insns; *cur != NULL; cur++) {
+    char* start = bitvector_to_string((*cur)->start);
+    char* end   = bitvector_to_string((*cur)->end);
+    char* asmx  = insn_to_asm((*cur)->insn);
+    printf("%s->%s: %s\n", start, end, asmx);
+    free(start);
+    free(end);
+    free(asmx);
+    free_disasm_insn(*cur);
+  }
+  free(insns);
   return 0;
 }

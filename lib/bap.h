@@ -23,6 +23,7 @@ ABSTRACT_TYPE(disasm)
 ABSTRACT_TYPE(mem)
 ABSTRACT_TYPE(bigstring)
 ABSTRACT_TYPE(bitvector)
+ABSTRACT_TYPE(insn)
 
 typedef bitvector bap_addr;
 
@@ -34,12 +35,17 @@ typedef enum {
 } bap_arch;
 
 typedef enum {
-  BAP_LITTLE_ENDIAN,
-  BAP_BIG_ENDIAN
+  BAP_LITTLE_ENDIAN = Val_int(0),
+  BAP_BIG_ENDIAN = Val_int(1)
 } bap_endian;
 
-#define Val_endian(x) Val_int(x)
-#define Endian_val(x) Int_val(x)
+typedef struct {
+  bap_addr start;
+  bap_addr end;
+  insn insn;
+} bap_disasm_insn;
+
+void free_disasm_insn(bap_disasm_insn*);
 
 // Load ocaml funcs
 #define NAMED_FUNC(name) \
@@ -57,3 +63,5 @@ mem       create_mem(off_t pos, size_t len, bap_endian endian, bap_addr addr,
 		     bigstring buf);
 char*     mem_to_string(mem);
 disasm disasm_mem(bap_addr* roots, bap_arch arch, mem mem);
+bap_disasm_insn** disasm_insns(disasm d);
+char*     insn_to_asm(insn);

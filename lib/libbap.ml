@@ -15,6 +15,10 @@ let disassemble_mem root_arr arch mem =
 let disasm_to_string d =
   Seq.fold (Disasm.insns d) ~init:"" ~f:(fun s (_, insn) ->
     s ^ (Insn.to_string insn) ^ "\n")
+let disasm_to_insns d =
+  Array.of_list (List.rev (Seq.fold (Disasm.insns d) ~init:[]
+    ~f:(fun s (mem, insn) ->
+      (Memory.min_addr mem, Memory.max_addr mem, insn)::s)))
 
 let _ = Callback.register "bigstring_of_string" bigstring_of_string
 let _ = Callback.register "bigstring_to_string" bigstring_to_string
@@ -24,3 +28,5 @@ let _ = Callback.register "bitvector_of_int64" bitvector_of_int64
 let _ = Callback.register "bitvector_to_string" Bitvector.to_string
 let _ = Callback.register "mem_to_string" Memory.to_string
 let _ = Callback.register "disasm_to_string" disasm_to_string
+let _ = Callback.register "disasm_to_insns" disasm_to_insns
+let _ = Callback.register "insn_asm" Insn.asm
