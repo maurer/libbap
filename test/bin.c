@@ -18,5 +18,15 @@ int main() {
   assert(len == sizeof(bs_test_str));
   printf("%s\n", bs_out_str);
   printf("%s\n", bs_out_str + 4);
+
+  bitvector addr0 = bitvector_of_int64(0, 32);
+  char shellcode[] = "\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80";
+  bigstring bs_shellcode = create_bigstring(0, sizeof(shellcode), shellcode);
+  mem mem = create_mem(0, sizeof(shellcode), BAP_LITTLE_ENDIAN, addr0, bs_shellcode);
+  free_bitvector(addr0);
+  char* mem_str = mem_to_string(mem);
+  free_mem(mem);
+  printf("%s", mem_str);
+  free(mem_str);
   return 0;
 }

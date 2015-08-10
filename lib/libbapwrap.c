@@ -12,6 +12,7 @@ NAMED_FUNC(disassemble_mem)
 NAMED_FUNC(bitvector_of_int64)
 NAMED_FUNC(bitvector_to_string)
 NAMED_FUNC(bigstring_to_string)
+NAMED_FUNC(mem_to_string)
 
 static char* argv[] = { NULL };
 
@@ -23,6 +24,7 @@ void libbap_init() {
   LOAD_FUNC(bitvector_of_int64)
   LOAD_FUNC(bitvector_to_string)
   LOAD_FUNC(bigstring_to_string)
+  LOAD_FUNC(mem_to_string)
 }
 
 bigstring create_bigstring(off_t pos, size_t len, char* buf) {
@@ -42,6 +44,10 @@ bitvector bitvector_of_int64(int64_t val, int8_t width) {
 
 char* bitvector_to_string(bitvector bv) {
   return strdup(String_val(caml_callback(*caml_bitvector_to_string, *bv)));
+}
+
+char* mem_to_string(mem mem) {
+  return strdup(String_val(caml_callback(*caml_mem_to_string, *mem)));
 }
 
 size_t bigstring_to_buf(bigstring bv, char* buf, size_t buf_size) {
