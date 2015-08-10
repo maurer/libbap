@@ -3,6 +3,7 @@
 #include <caml/alloc.h>
 #include <bap.h>
 #include <string.h>
+#include <stdlib.h>
 #include <assert.h>
 
 NAMED_FUNC(bigstring_of_string)
@@ -10,6 +11,7 @@ NAMED_FUNC(mem_create)
 NAMED_FUNC(disassemble_mem)
 NAMED_FUNC(bitvector_of_int64)
 NAMED_FUNC(bitvector_to_string)
+NAMED_FUNC(bigstring_to_string)
 
 static char* argv[] = { NULL };
 
@@ -20,9 +22,10 @@ void libbap_init() {
   LOAD_FUNC(disassemble_mem)
   LOAD_FUNC(bitvector_of_int64)
   LOAD_FUNC(bitvector_to_string)
+  LOAD_FUNC(bigstring_to_string)
 }
 
-bigstring create_bigstring(char* buf, size_t len, off_t pos) {
+bigstring create_bigstring(off_t pos, size_t len, char* buf) {
   value ocaml_string = caml_alloc_string(len);
   memcpy(String_val(ocaml_string), buf, len);
 
@@ -41,15 +44,19 @@ char* bitvector_to_string(bitvector bv) {
   return strdup(String_val(caml_callback(*caml_bitvector_to_string, *bv)));
 }
 
-/*
+size_t bigstring_to_buf(bigstring bv, char* buf, size_t buf_size) {
+  value caml_buf = caml_callback(*caml_bigstring_to_string, *bv);
+  size_t caml_buf_len = caml_string_length(caml_buf);
+  size_t out_len = (buf_size < caml_buf_len) ? buf_size : caml_buf_len;
+  memcpy(buf, String_val(caml_buf), out_len);
+  return out_len;
+}
+
 mem create_mem(off_t pos, size_t len, bap_endian endian, bap_addr addr,
 		bigstring buf) {
-  return alloc_mem(caml_callback5(*caml_mem_create,
-			          Val_int(pos), Val_int(len),
-				  Val_endian(endian), *addr,
-				  *buf));
+  value args[] = {Val_int(pos), Val_int(len), endian, *addr, *buf};
+  return alloc_mem(caml_callbackN(*caml_mem_create, 5, args));
 }
-*/
 
 disasm disasm_mem(bap_addr* roots, size_t num_addrs, bap_arch arch, mem mem) {
   //TODO actually load roots

@@ -76,3 +76,5 @@ typedef enum {
 
 bitvector bitvector_of_int64(int64_t val, int8_t width);
 char*     bitvector_to_string(bitvector);
+bigstring create_bigstring(off_t start, size_t len, char* buf);
+size_t    bigstring_to_buf(bigstring, char*, size_t);
