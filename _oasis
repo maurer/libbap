@@ -12,6 +12,7 @@ Library libbap
   BuildTools: ocamlbuild
   Modules:    Libbap
   CSources:   libbapwrap.c
+  CCOpt:      -I../lib
   CompiledObject: native
   BuildDepends: core_kernel,
                 bap
