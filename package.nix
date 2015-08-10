@@ -13,7 +13,7 @@ stdenv.mkDerivation rec {
                   faillib pa_ounit pa_test camlzip ocamlgraph bitstring
                   zarith uuidm fileutils ];
   preConfigure = "oasis setup";
-  dontStrip = true;
+  doCheck = true;
   meta = with stdenv.lib; {
     description = "C Bindings for BAP";
     license = licenses.mit;

@@ -21,3 +21,6 @@ install: $(SOS_FILES) lib/bap.h
 	source setup.data && cp $(SOS_FILES) $$libdir
 	source setup.data && mkdir -p $$prefix/include
 	source setup.data && cp lib/bap.h $$prefix/include
+
+check: all
+	make -C test
