@@ -46,6 +46,165 @@ typedef struct {
   bap_insn insn;
 } bap_disasm_insn;
 
+typedef enum {
+  BAP_TYPE_IMM,
+  BAP_TYPE_MEM
+} bap_type_kind;
+
+// All sizes are in bits. All of them. Always.
+
+typedef struct {
+  bap_type_kind kind;
+  union {
+    int imm;
+    struct {
+      int addr_size;
+      int cell_size;
+    } mem;
+  };
+} bap_type;
+
+typedef struct {
+  char* name;
+  bap_type* type;
+  bool tmp;
+  int version;
+} bap_var;
+
+typedef enum {
+  BAP_BINOP_PLUS,
+  BAP_BINOP_MINUS,
+  BAP_BINOP_TIMES,
+  BAP_BINOP_DIVIDE,
+  BAP_BINOP_SDIVIDE,
+  BAP_BINOP_MOD,
+  BAP_BINOP_SMOD,
+  BAP_BINOP_LSHIFT,
+  BAP_BINOP_RSHIFT,
+  BAP_BINOP_ARSHIFT,
+  BAP_BINOP_AND,
+  BAP_BINOP_OR,
+  BAP_BINOP_XOR,
+  BAP_BINOP_EQ,
+  BAP_BINOP_NEQ,
+  BAP_BINOP_LT,
+  BAP_BINOP_LE,
+  BAP_BINOP_SLT,
+  BAP_BINOP_SLE
+} bap_binop;
+
+typedef enum {
+  BAP_UNOP_NEG,
+  BAP_UNOP_NOT
+} bap_unop;
+
+typedef enum {
+  BAP_EXPR_LOAD,
+  BAP_EXPR_STORE,
+  BAP_EXPR_BINOP,
+  BAP_EXPR_UNOP,
+  BAP_EXPR_VAR,
+  BAP_EXPR_IMM,
+  BAP_EXPR_CAST,
+  BAP_EXPR_LET,
+  BAP_EXPR_UNK,
+  BAP_EXPR_ITE,
+  BAP_EXPR_EXTRACT,
+  BAP_EXPR_CONCAT
+} bap_expr_kind;
+
+typedef enum {
+  BAP_CAST_UNSIGNED,
+  BAP_CAST_SIGNED,
+  BAP_CAST_HIGH,
+  BAP_CAST_LOW,
+} bap_cast_type;
+
+typedef struct bap_expr {
+  bap_expr_kind kind;
+  union {
+    struct {
+      struct bap_expr *memory;
+      struct bap_expr *index;
+      bap_endian endian;
+      int size;
+    } load;
+    struct {
+      struct bap_expr *memory;
+      struct bap_expr *index;
+      struct bap_expr *value;
+      bap_endian endian;
+      int size;
+    } store;
+    struct {
+      bap_binop op;
+      struct bap_expr *lhs, *rhs;
+    } binop;
+    struct {
+      bap_unop op;
+      struct bap_expr *arg;
+    } unop;
+    bap_var *var;
+    bap_bitvector imm;
+    struct {
+      bap_cast_type type;
+      int width;
+      struct bap_expr *val;
+    } cast;
+    struct {
+      bap_var *bound_var;
+      struct bap_expr *bound_expr;
+      struct bap_expr *body_expr;
+    } let;
+    struct {
+      char* descr;
+      bap_type *type;
+    } unknown;
+    struct {
+      struct bap_expr *cond;
+      struct bap_expr *t;
+      struct bap_expr *f;
+    } ite;
+    struct {
+      int low_bit;
+      int high_bit;
+      struct bap_expr *val;
+    } extract;
+    struct {
+      struct bap_expr *low, *high;
+    } concat;
+  };
+} bap_expr;
+
+typedef enum {
+  BAP_STMT_MOVE,
+  BAP_STMT_JMP,
+  BAP_STMT_WHILE,
+  BAP_STMT_IF,
+  BAP_STMT_CPU_EXN
+} bap_stmt_kind;
+
+typedef struct bap_stmt {
+  bap_stmt_kind kind;
+  union {
+    struct {
+      bap_var  *lhs;
+      bap_expr *rhs;
+    } move;
+    bap_expr *jmp;
+    struct {
+      bap_expr *cond;
+      struct bap_stmt **body;
+    } s_while;
+    struct {
+      bap_expr *cond;
+      struct bap_stmt **t;
+      struct bap_stmt **f;
+    } ite;
+    int cpu_exn;
+  };
+} bap_stmt;
+
 void free_disasm_insn(bap_disasm_insn*);
 
 // Load ocaml funcs
