@@ -1,6 +1,7 @@
 #include <caml/mlvalues.h>
 #include <caml/callback.h>
 #include <caml/alloc.h>
+#include <bap_internal.h>
 #include <bap.h>
 #include <string.h>
 #include <stdlib.h>
@@ -68,7 +69,7 @@ size_t bap_bigstring_to_buf(bap_bigstring bv, char* buf, size_t buf_size) {
   return out_len;
 }
 
-bap_mem bap_create_mem(off_t pos, size_t len, bap_endian endian, bap_addr addr,
+bap_mem bap_create_mem(size_t pos, size_t len, bap_endian endian, bap_addr addr,
                        bap_bigstring buf) {
   value args[] = {Val_int(pos), Val_int(len), endian, *addr, *buf};
   return bap_alloc_mem(caml_callbackN(*caml_mem_create, 5, args));

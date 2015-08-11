@@ -1,30 +1,19 @@
-#include <caml/mlvalues.h>
-#include <caml/alloc.h>
-#include <caml/memory.h>
-
 #include <stdint.h>
 #include <stdbool.h>
-#include <assert.h>
+#include <stddef.h>
 
+#ifndef __BAP_INTERNAL_H
 //Abstract types
 #define ABSTRACT_TYPE(name) \
-  typedef value* bap_##name; \
-  void static inline bap_free_##name(bap_##name ptr) { \
-    caml_remove_global_root(ptr); \
-    free(ptr); \
-  } \
-  bap_##name static inline bap_alloc_##name(value caml) { \
-    bap_##name out = malloc(sizeof(value)); \
-    *out = caml; \
-    caml_register_global_root(out); \
-    return out; \
-  }
+  typedef void* bap_##name; \
+  void inline bap_free_##name(bap_##name);
 
 ABSTRACT_TYPE(disasm)
 ABSTRACT_TYPE(mem)
 ABSTRACT_TYPE(bigstring)
 ABSTRACT_TYPE(bitvector)
 ABSTRACT_TYPE(insn)
+#endif
 
 typedef bap_bitvector bap_addr;
 
@@ -36,8 +25,8 @@ typedef enum {
 } bap_arch;
 
 typedef enum {
-  BAP_LITTLE_ENDIAN = Val_int(0),
-  BAP_BIG_ENDIAN = Val_int(1)
+  BAP_LITTLE_ENDIAN = 1,
+  BAP_BIG_ENDIAN = 3
 } bap_endian;
 
 typedef struct {
@@ -207,14 +196,6 @@ typedef struct bap_stmt {
 
 void free_disasm_insn(bap_disasm_insn*);
 
-// Load ocaml funcs
-#define NAMED_FUNC(name) \
-  static value *caml_##name = NULL;
-#define LOAD_FUNC(name) \
-  caml_##name = caml_named_value(#name);\
-  assert(caml_##name != NULL);\
-  caml_register_global_root(caml_##name);
-
 // String rendering
 char*     bap_disasm_to_string(bap_disasm);
 char*     bap_bitvector_to_string(bap_bitvector);
@@ -241,7 +222,7 @@ bap_bitvector bap_create_bitvector64(int64_t val, int16_t width);
 bap_bigstring bap_create_bigstring(char* buf, size_t len);
 
 // Create a memory region from a bigstring buffer
-bap_mem       bap_create_mem(off_t pos,          // Starting index in the buf
+bap_mem       bap_create_mem(size_t pos,          // Starting index in the buf
                              size_t len,         // Number of bytes to put in
                              bap_endian endian,  // Endiannes of the memory
                              bap_addr addr,      // Region base address
