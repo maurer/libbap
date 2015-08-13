@@ -1,8 +1,13 @@
+
+//For asprintf
+#define _GNU_SOURCE
+
 #include <caml/mlvalues.h>
 #include <caml/callback.h>
 #include <caml/alloc.h>
 #include <bap_internal.h>
 #include <bap.h>
+#include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -17,6 +22,9 @@ NAMED_FUNC(mem_to_string)
 NAMED_FUNC(disasm_to_string)
 NAMED_FUNC(disasm_to_insns)
 NAMED_FUNC(insn_asm)
+NAMED_FUNC(insn_to_bils)
+NAMED_FUNC(array_of_list)
+NAMED_FUNC(size_to_bits)
 
 static char* argv[] = { NULL };
 
@@ -32,6 +40,9 @@ void bap_init() {
   LOAD_FUNC(disasm_to_string)
   LOAD_FUNC(disasm_to_insns)
   LOAD_FUNC(insn_asm)
+  LOAD_FUNC(insn_to_bils)
+  LOAD_FUNC(array_of_list)
+  LOAD_FUNC(size_to_bits)
 }
 
 bap_bigstring bap_create_bigstring(char* buf, size_t len) {
@@ -101,7 +112,9 @@ void bap_free_disasm_insn(bap_disasm_insn *di) {
 }
 
 bap_disasm_insn** bap_disasm_get_insns(bap_disasm d) {
-  value caml_arr = caml_callback(*caml_disasm_to_insns, *d);
+  CAMLparam0 ();
+  CAMLlocal1(caml_arr);
+  caml_arr = caml_callback(*caml_disasm_to_insns, *d);
   size_t arr_len = caml_array_length(caml_arr);
   bap_disasm_insn** out = malloc(sizeof(bap_disasm_insn*) * (arr_len + 1));
   size_t i;
@@ -113,9 +126,466 @@ bap_disasm_insn** bap_disasm_get_insns(bap_disasm d) {
     out[i]->insn  = bap_alloc_insn(Field(entry, 2));
   }
   out[arr_len] = NULL;
-  return out;
+  CAMLreturnT(bap_disasm_insn**, out);
 }
 
 char* bap_insn_to_asm(bap_insn i) {
   return strdup(String_val(caml_callback(*caml_insn_asm, *i)));
+}
+
+static bap_stmt* project_bil_stmt(value);
+static bap_var* project_bap_var(value);
+static bap_expr* project_bap_expr(value);
+static bap_stmt** project_bil_list_stmts(value);
+static bap_type* project_bap_type(value);
+static int project_bap_size(value);
+
+static int project_bap_size(value abs_sz) {
+  return Int_val(caml_callback(*caml_size_to_bits, abs_sz));
+}
+
+static bap_type* project_bap_type(value abs_type) {
+  bap_type* type = malloc(sizeof(bap_type));
+  type->kind = Tag_val(abs_type);
+  switch (type->kind) {
+    case BAP_TYPE_IMM:
+      type->imm = Int_val(Field(abs_type, 0));
+      break;
+    case BAP_TYPE_MEM:
+      type->mem.addr_size = project_bap_size(Field(abs_type, 0));
+      type->mem.cell_size = project_bap_size(Field(abs_type, 1));
+      break;
+    default:
+      assert(!"Unknown type kind");
+  }
+  return type;
+}
+
+static bap_var* project_bap_var(value abs_var) {
+  bap_var* var = malloc(sizeof(bap_var));
+  var->name = strdup(String_val(Field(abs_var, 0)));
+  var->version = Int_val(Field(abs_var, 1));
+  var->type = project_bap_type(Field(abs_var, 2));
+  var->tmp = Bool_val(Field(abs_var, 3));
+  return var;
+}
+
+static bap_expr* project_bap_expr(value abs_expr) {
+  bap_expr* expr = malloc(sizeof(bap_expr));
+  expr->kind = Tag_val(abs_expr);
+  switch (expr->kind) {
+    case BAP_EXPR_LOAD:
+      expr->load.memory = project_bap_expr(Field(abs_expr, 0));
+      expr->load.index = project_bap_expr(Field(abs_expr, 1));
+      expr->load.endian = Field(abs_expr, 2);
+      expr->load.size = project_bap_size(Field(abs_expr, 3));
+      break;
+    case BAP_EXPR_STORE:
+      expr->store.memory = project_bap_expr(Field(abs_expr, 0));
+      expr->store.index = project_bap_expr(Field(abs_expr, 1));
+      expr->store.value = project_bap_expr(Field(abs_expr, 2));
+      expr->store.endian = Field(abs_expr, 3);
+      expr->store.size = project_bap_size(Field(abs_expr, 4));
+      break;
+    case BAP_EXPR_BINOP:
+      expr->binop.op = Int_val(Field(abs_expr, 0));
+      expr->binop.lhs = project_bap_expr(Field(abs_expr, 1));
+      expr->binop.rhs = project_bap_expr(Field(abs_expr, 2));
+      break;
+    case BAP_EXPR_UNOP:
+      expr->unop.op = Int_val(Field(abs_expr, 0));
+      expr->unop.arg = project_bap_expr(Field(abs_expr, 1));
+      break;
+    case BAP_EXPR_VAR:
+      expr->var = project_bap_var(Field(abs_expr, 0));
+      break;
+    case BAP_EXPR_IMM:
+      expr->imm = bap_alloc_bitvector(Field(abs_expr, 0));
+      break;
+    case BAP_EXPR_CAST:
+      expr->cast.type = Int_val(Field(abs_expr, 0));
+      expr->cast.width = Int_val(Field(abs_expr, 1));
+      expr->cast.val = project_bap_expr(Field(abs_expr, 2));
+      break;
+    case BAP_EXPR_LET:
+      expr->let.bound_var = project_bap_var(Field(abs_expr, 0));
+      expr->let.bound_expr = project_bap_expr(Field(abs_expr, 1));
+      expr->let.body_expr = project_bap_expr(Field(abs_expr, 2));
+      break;
+    case BAP_EXPR_UNK:
+      expr->unknown.descr = strdup(String_val(Field(abs_expr, 0)));
+      expr->unknown.type = project_bap_type(Field(abs_expr, 1));
+      break;
+    case BAP_EXPR_ITE:
+      expr->ite.cond = project_bap_expr(Field(abs_expr, 0));
+      expr->ite.t = project_bap_expr(Field(abs_expr, 1));
+      expr->ite.f = project_bap_expr(Field(abs_expr, 2));
+      break;
+    case BAP_EXPR_EXTRACT:
+      expr->extract.low_bit = Int_val(Field(abs_expr, 0));
+      expr->extract.high_bit = Int_val(Field(abs_expr, 1));
+      expr->extract.val = project_bap_expr(Field(abs_expr, 2));
+      break;
+    case BAP_EXPR_CONCAT:
+      expr->concat.low = project_bap_expr(Field(abs_expr, 0));
+      expr->concat.high = project_bap_expr(Field(abs_expr, 1));
+      break;
+    default:
+      assert(!"Unknown expression kind");
+  }
+  return expr;
+}
+
+static bap_stmt** project_bil_list_stmts(value bil_list) {
+  CAMLparam0();
+  CAMLlocal1(stmt_arr);
+  stmt_arr = caml_callback(*caml_array_of_list, bil_list);
+  size_t arr_len = caml_array_length(stmt_arr);
+  bap_stmt** out = malloc(sizeof(bap_stmt*) * (arr_len + 1));
+  size_t i;
+  for (i = 0; i < arr_len; i++) {
+    out[i] = project_bil_stmt(Field(stmt_arr, i));
+  }
+  out[arr_len] = NULL;
+  CAMLreturnT(bap_stmt**, out);
+}
+static bap_stmt* project_bil_stmt(value bil) {
+  bap_stmt* stmt = malloc(sizeof(bap_stmt));
+  stmt->kind = Tag_val(bil);
+  switch (stmt->kind) {
+    case BAP_STMT_MOVE:
+      stmt->move.lhs = project_bap_var(Field(bil, 0));
+      stmt->move.rhs = project_bap_expr(Field(bil, 1));
+      break;
+    case BAP_STMT_JMP:
+      stmt->jmp = project_bap_expr(Field(bil, 0));
+      break;
+    case BAP_STMT_SPECIAL:
+      stmt->special = strdup(String_val(Field(bil, 0)));
+      break;
+    case BAP_STMT_WHILE:
+      stmt->s_while.cond = project_bap_expr(Field(bil, 0));
+      stmt->s_while.body = project_bil_list_stmts(Field(bil, 1));
+      break;
+    case BAP_STMT_IF:
+      stmt->ite.cond = project_bap_expr(Field(bil, 0));
+      stmt->ite.t = project_bil_list_stmts(Field(bil, 1));
+      stmt->ite.f = project_bil_list_stmts(Field(bil, 2));
+      break;
+    case BAP_STMT_CPU_EXN:
+      stmt->cpu_exn = Int_val(Field(bil, 0));
+      break;
+    default:
+      assert(!"Unknown statement kind");
+  }
+  return stmt;
+}
+
+bap_stmt** bap_insn_get_stmts(bap_insn insn) {
+  CAMLparam0 ();
+  CAMLlocal1(bils);
+  bils = caml_callback_exn(*caml_insn_to_bils, *insn);
+  if (Is_exception_result(bils)) {
+    CAMLreturnT(bap_stmt**, NULL);
+  }
+  CAMLreturnT(bap_stmt**, project_bil_list_stmts(bils));
+}
+
+const char* bap_str_endian(bap_endian e) {
+  switch (e) {
+    case BAP_LITTLE_ENDIAN:
+      return "el";
+    case BAP_BIG_ENDIAN:
+      return "be";
+    default:
+      assert(!"Endian must be big or little");
+      return "??";
+  }
+}
+
+const char* bap_str_binop(bap_binop op) {
+  switch (op) {
+    case BAP_BINOP_PLUS:
+      return "+";
+    case BAP_BINOP_MINUS:
+      return "-";
+    case BAP_BINOP_TIMES:
+      return "*";
+    case BAP_BINOP_DIVIDE:
+      return "/";
+    case BAP_BINOP_SDIVIDE:
+      return "~/";
+    case BAP_BINOP_MOD:
+      return "%";
+    case BAP_BINOP_SMOD:
+      return "~%";
+    case BAP_BINOP_LSHIFT:
+      return "<<";
+    case BAP_BINOP_RSHIFT:
+      return ">>";
+    case BAP_BINOP_ARSHIFT:
+      return "~>>";
+    case BAP_BINOP_AND:
+      return "&";
+    case BAP_BINOP_OR:
+      return "|";
+    case BAP_BINOP_XOR:
+      return "^";
+    case BAP_BINOP_EQ:
+      return "==";
+    case BAP_BINOP_NEQ:
+      return "!=";
+    case BAP_BINOP_LT:
+      return "<";
+    case BAP_BINOP_LE:
+      return "<=";
+    case BAP_BINOP_SLT:
+      return "~<";
+    case BAP_BINOP_SLE:
+      return "~<=";
+    default:
+      assert(!"Unknown binop");
+      return "?";
+  }
+}
+
+const char* bap_str_unop(bap_unop op) {
+  switch (op) {
+    case BAP_UNOP_NEG:
+      return "-";
+    case BAP_UNOP_NOT:
+      return "~";
+    default:
+      assert(!"Unknown unop");
+      return "?";
+  }
+}
+
+const char* bap_str_cast_type(bap_cast_type cast) {
+  switch (cast) {
+    case BAP_CAST_UNSIGNED:
+      return "u";
+    case BAP_CAST_SIGNED:
+      return "~";
+    case BAP_CAST_HIGH:
+      return "h";
+    case BAP_CAST_LOW:
+      return "l";
+    default:
+      assert(!"Unknown cast");
+      return "?";
+  }
+}
+
+char* bap_render_type(bap_type* type) {
+  char* out;
+  switch (type->kind) {
+    case BAP_TYPE_IMM:
+      asprintf(&out, "r%d", type->imm);
+      break;
+    case BAP_TYPE_MEM:
+      asprintf(&out, "mem[%d:%d]", type->mem.addr_size, type->mem.cell_size);
+      break;
+    default:
+      assert(!"Tried to render invalid type kind");
+  }
+  return out;
+}
+
+char* bap_render_var(bap_var* var) {
+  char* tmp = var->tmp ? ".tmp" : "";
+  char* type_str = bap_render_type(var->type);
+  char* out;
+  asprintf(&out, "%s%s.%d : %s", var->name, tmp, var->version, type_str);
+  free(type_str);
+  return out;
+}
+
+char* bap_render_expr(bap_expr* expr) {
+  char* out;
+  switch (expr->kind) {
+    case BAP_EXPR_LOAD:
+    {
+      char *mem_str = bap_render_expr(expr->load.memory);
+      char *index_str = bap_render_expr(expr->load.index);
+      const char *endian_str = bap_str_endian(expr->load.endian);
+      asprintf(&out, "%s[%s~%d:%s]", mem_str, index_str, expr->load.size, endian_str);
+      free(mem_str);
+      free(index_str);
+      break;
+    }
+    case BAP_EXPR_STORE:
+    {
+      char *mem_str = bap_render_expr(expr->store.memory);
+      char *index_str = bap_render_expr(expr->store.index);
+      const char *endian_str = bap_str_endian(expr->store.endian);
+      char *val_str = bap_render_expr(expr->store.value);
+      asprintf(&out, "(%s[%s~%d:%s] <- %s)", mem_str, index_str, expr->store.size, endian_str, val_str);
+      free(mem_str);
+      free(index_str);
+      free(val_str);
+      break;
+    }
+    case BAP_EXPR_BINOP:
+    {
+      const char *binop_str = bap_str_binop(expr->binop.op);
+      char *lhs_str = bap_render_expr(expr->binop.lhs);
+      char *rhs_str = bap_render_expr(expr->binop.rhs);
+      asprintf(&out, "%s %s %s", lhs_str, binop_str, rhs_str);
+      free(lhs_str);
+      free(rhs_str);
+      break;
+    }
+    case BAP_EXPR_UNOP:
+    {
+      const char *unop_str = bap_str_unop(expr->unop.op);
+      char *arg_str = bap_render_expr(expr->unop.arg);
+      asprintf(&out, "(%s %s)", unop_str, arg_str);
+      free(arg_str);
+      break;
+    }
+    case BAP_EXPR_VAR:
+    {
+      out = bap_render_var(expr->var);
+      break;
+    }
+    case BAP_EXPR_IMM:
+    {
+      out = bap_bitvector_to_string(expr->imm);
+      break;
+    }
+    case BAP_EXPR_CAST:
+    {
+      const char* cast_type_str = bap_str_cast_type(expr->cast.type);
+      char* arg_str = bap_render_expr(expr->cast.val);
+      asprintf(&out, "(%s:%d)(%s)", cast_type_str, expr->cast.width, arg_str);
+      free(arg_str);
+      break;
+    }
+    case BAP_EXPR_LET:
+    {
+      char* bound_var_str = bap_render_var(expr->let.bound_var);
+      char* bound_expr_str = bap_render_expr(expr->let.bound_expr);
+      char* body_str = bap_render_expr(expr->let.body_expr);
+      asprintf(&out, "let %s = %s in %s", bound_var_str, bound_expr_str, body_str);
+      free(bound_var_str);
+      free(bound_expr_str);
+      free(body_str);
+      break;
+    }
+    case BAP_EXPR_UNK:
+    {
+      char* type_str = bap_render_type(expr->unknown.type);
+      asprintf(&out, "(\"%s\" : %s)", expr->unknown.descr, type_str);
+      free(type_str);
+      break;
+    }
+    case BAP_EXPR_ITE:
+    {
+      char* cond_str = bap_render_expr(expr->ite.cond);
+      char* t_str = bap_render_expr(expr->ite.t);
+      char* f_str = bap_render_expr(expr->ite.f);
+      asprintf(&out, "(%s : %s ? %s)", cond_str, t_str, f_str);
+      free(cond_str);
+      free(t_str);
+      free(f_str);
+      break;
+    }
+    case BAP_EXPR_EXTRACT:
+    {
+      char* val_str = bap_render_expr(expr->extract.val);
+      asprintf(&out, "%s[%d:%d]", val_str, expr->extract.low_bit, expr->extract.high_bit);
+      free(val_str);
+      break;
+    }
+    case BAP_EXPR_CONCAT:
+    {
+      char* low_str = bap_render_expr(expr->concat.low);
+      char* high_str = bap_render_expr(expr->concat.high);
+      asprintf(&out, "%s ++ %s", low_str, high_str);
+      free(low_str);
+      free(high_str);
+      break;
+    }
+    default:
+      assert(!"Rendering unknown expr kind");
+  }
+  return out;
+}
+
+char* bap_render_stmt(bap_stmt*);
+
+char* bap_render_stmts(char* indent, bap_stmt** stmts) {
+  bap_stmt** cur;
+  size_t stmt_count = 0;
+  for (cur = stmts; *cur != NULL; cur++, stmt_count++);
+  char** strs = alloca(sizeof(char*) * stmt_count);
+  size_t str_len = 1;
+  size_t i;
+  for (i = 0; i < stmt_count; i++) {
+    char* stmt_str = bap_render_stmt(stmts[i]);
+    str_len += asprintf(&strs[i], "%s%s\n", indent, stmt_str);
+    free(stmt_str);
+  }
+  char* out = malloc(sizeof(char) * str_len);
+  size_t remaining = str_len;
+  char* cur_out = out;
+  for (i = 0; i < stmt_count; i++) {
+    size_t written = snprintf(cur_out, remaining, "%s", strs[i]);
+    cur_out += written;
+    remaining -= written;
+    free(strs[i]);
+  }
+  return out;
+}
+
+char* bap_render_stmt(bap_stmt* stmt) {
+  char* out;
+  switch (stmt->kind) {
+    case BAP_STMT_MOVE:
+    {
+      char* var_str = bap_render_var(stmt->move.lhs);
+      char* expr_str = bap_render_expr(stmt->move.rhs);
+      asprintf(&out, "%s <- %s", var_str, expr_str);
+      free(var_str);
+      free(expr_str);
+      break;
+    }
+    case BAP_STMT_JMP:
+    {
+      char* tgt = bap_render_expr(stmt->jmp);
+      asprintf(&out, "jmp %s", tgt);
+      free(tgt);
+      break;
+    }
+    case BAP_STMT_SPECIAL:
+      asprintf(&out, "special: %s", stmt->special);
+      break;
+    case BAP_STMT_WHILE:
+    {
+      char* cond = bap_render_expr(stmt->s_while.cond);
+      char* body = bap_render_stmts("  ", stmt->s_while.body);
+      asprintf(&out, "while (%s) {\n%s}", cond, body);
+      free(cond);
+      free(body);
+      break;
+    }
+    case BAP_STMT_IF:
+    {
+      char* cond = bap_render_expr(stmt->ite.cond);
+      char* t = bap_render_stmts("  ", stmt->ite.t);
+      char* f = bap_render_stmts("  ", stmt->ite.f);
+      asprintf(&out, "if (%s) {\n%s} else {\n%s}", cond, t, f);
+      free(cond);
+      free(t);
+      free(f);
+      break;
+    }
+    case BAP_STMT_CPU_EXN:
+      asprintf(&out, "cpu_exn: %d", stmt->cpu_exn);
+      break;
+    default:
+      asprintf(&out, "DECODE ERROR: STMT KIND %d", stmt->kind);
+  }
+  return out;
 }

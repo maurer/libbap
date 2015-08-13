@@ -27,6 +27,7 @@ ABSTRACT_TYPE(mem)
 ABSTRACT_TYPE(bigstring)
 ABSTRACT_TYPE(bitvector)
 ABSTRACT_TYPE(insn)
+ABSTRACT_TYPE(bil)
 
 // Load ocaml funcs
 #define NAMED_FUNC(name) \

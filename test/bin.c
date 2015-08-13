@@ -1,6 +1,7 @@
 #include <bap.h>
 #include <stdio.h>
 #include <assert.h>
+#include <stdlib.h>
 
 int main() {
   bap_init();
@@ -42,6 +43,13 @@ int main() {
     free(start);
     free(end);
     free(asmx);
+
+    //TODO actually free
+    bap_stmt** stmts = bap_insn_get_stmts((*cur)->insn);
+    bap_stmt** ic;
+    for (ic = stmts; *ic != NULL; ic++) {
+      printf("%s\n", bap_render_stmt(*ic));
+    }
     bap_free_disasm_insn(*cur);
   }
   free(insns);

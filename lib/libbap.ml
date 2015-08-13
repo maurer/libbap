@@ -20,6 +20,13 @@ let disasm_to_insns d =
     ~f:(fun s (mem, insn) ->
       (Memory.min_addr mem, Memory.max_addr mem, insn)::s)))
 
+let size_to_bits (sz : Size.t) : int =
+  match sz with
+    | `r8 -> 8
+    | `r16 -> 16
+    | `r32 -> 32
+    | `r64 -> 64
+
 let _ = Callback.register "bigstring_of_string" bigstring_of_string
 let _ = Callback.register "bigstring_to_string" bigstring_to_string
 let _ = Callback.register "mem_create" mem_create
@@ -30,3 +37,6 @@ let _ = Callback.register "mem_to_string" Memory.to_string
 let _ = Callback.register "disasm_to_string" disasm_to_string
 let _ = Callback.register "disasm_to_insns" disasm_to_insns
 let _ = Callback.register "insn_asm" Insn.asm
+let _ = Callback.register "insn_to_bils" Insn.bil
+let _ = Callback.register "array_of_list" Array.of_list
+let _ = Callback.register "size_to_bits" size_to_bits

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <stddef.h>
+#include <stdio.h>
 
 #ifndef __BAP_INTERNAL_H
 //Abstract types
@@ -168,6 +169,7 @@ typedef struct bap_expr {
 typedef enum {
   BAP_STMT_MOVE,
   BAP_STMT_JMP,
+  BAP_STMT_SPECIAL,
   BAP_STMT_WHILE,
   BAP_STMT_IF,
   BAP_STMT_CPU_EXN
@@ -181,6 +183,7 @@ typedef struct bap_stmt {
       bap_expr *rhs;
     } move;
     bap_expr *jmp;
+    char *special;
     struct {
       bap_expr *cond;
       struct bap_stmt **body;
@@ -201,6 +204,7 @@ char*     bap_disasm_to_string(bap_disasm);
 char*     bap_bitvector_to_string(bap_bitvector);
 char*     bap_mem_to_string(bap_mem);
 char*     bap_insn_to_asm(bap_insn);
+void      bap_print_stmt(FILE*, bap_stmt*);
 
 // Projection (convert abstract types to C-native ones)
 // Determine length of a bigstring, e.g. for use with bap_bigstring_to_buf.
@@ -237,3 +241,7 @@ bap_disasm bap_disasm_mem(bap_addr* roots, // NULL terminated array of roots
 
 // Acquire the instructions from a disassembly as a null terminated array
 bap_disasm_insn** bap_disasm_get_insns(bap_disasm d);
+
+// Acquire the BIL description from an instruction as a null terminated array
+// Returning null indicates that the lift failed
+bap_stmt** bap_insn_get_stmts(bap_insn i);
