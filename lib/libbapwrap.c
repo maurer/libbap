@@ -589,3 +589,7 @@ char* bap_render_stmt(bap_stmt* stmt) {
   }
   return out;
 }
+
+void bap_free(void* p) {
+  free(p);
+}
