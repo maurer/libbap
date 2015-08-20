@@ -247,3 +247,5 @@ bap_stmt** bap_insn_get_stmts(bap_insn i);
 
 //Free native pointers
 void bap_free(void*);
+
+void bap_init();
