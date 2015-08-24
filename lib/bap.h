@@ -196,7 +196,7 @@ typedef struct bap_stmt {
   };
 } bap_stmt;
 
-void free_disasm_insn(bap_disasm_insn*);
+void bap_free_disasm_insn(bap_disasm_insn*);
 
 // String rendering
 char*     bap_render_stmt(bap_stmt*);

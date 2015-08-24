@@ -1,0 +1,26 @@
+BAP_0.1 {
+  global:
+    bap_free_disasm;
+    bap_free_mem;
+    bap_free_bitstring;
+    bap_free_bitvector;
+    bap_free_bigstring;
+    bap_free_insn;
+    bap_free_disasm_insn;
+    bap_render_stmt;
+    bap_disasm_to_string;
+    bap_bitvector_to_string;
+    bap_mem_to_string;
+    bap_insn_to_asm;
+    bap_bigstring_length;
+    bap_bigstring_to_buf;
+    bap_create_bitvector64;
+    bap_create_bigstring;
+    bap_create_mem;
+    bap_disasm_mem;
+    bap_disasm_get_insns;
+    bap_insn_get_stmts;
+    bap_free;
+    bap_init;
+  local: *;
+};

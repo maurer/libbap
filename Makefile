@@ -10,8 +10,8 @@ _build/clib:
 _build/clib/liblibbap_stubs.a: build
 	cp _build/lib/liblibbap_stubs.a $@
 
-_build/clib/libbap.so: build _build/clib _build/clib/liblibbap_stubs.a
-	cd _build/clib && ocamlfind ocamlopt -linkpkg -output-obj ../lib/*.cmx -ccopt -Wl,--whole-archive -ccopt liblibbap_stubs.a -ccopt -Wl,--no-whole-archive -o libbap.so $(DEP_PACKAGES_FLAGS)
+_build/clib/libbap.so: build _build/clib _build/clib/liblibbap_stubs.a export.map
+	cd _build/clib && ocamlfind ocamlopt -linkpkg -output-obj ../lib/*.cmx -ccopt -Wl,--whole-archive -ccopt liblibbap_stubs.a -ccopt -Wl,--no-whole-archive,--version-script=$(CURDIR)/export.map -o libbap.so $(DEP_PACKAGES_FLAGS)
 
 install: _build/clib/libbap.so lib/bap.h
 	source setup.data && mkdir -p $$libdir
