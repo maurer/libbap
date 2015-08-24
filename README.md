@@ -18,7 +18,13 @@ make install
 
 ## Usage
  * Call `bap_init` before calling any function. This function should be idempotent.
- * Make all calls to `libbap` from the thread in which `bap_init` was initially called. The threading rules may be more lax than this, but I'm still trying to nail them down.
+### Threading
+You have two basic options:
+ 1. Make all calls to `libbap` from the thread in which `bap_init` was initially called.
+ 2. Be aware that calls into `libbap` all block each other. This is due to a limitation in the OCaml runtime.
+   * Every thread which calls into `libbap` *must* call `bap_thread_register` first.
+   * Any calls into `libbap` *must* be bracketed by `bap_acquire` and `bap_release` calls.
+   * Any thread which registered with `libbap` via `bap_thread_register` *must* call `bap_thread_unregister` before termination.
 
 ## Warning
 This project is currently extremely nascent, and likely does not have any functionality that you want yet.

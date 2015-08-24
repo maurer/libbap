@@ -245,7 +245,17 @@ bap_disasm_insn** bap_disasm_get_insns(bap_disasm d);
 // Returning null indicates that the lift failed
 bap_stmt** bap_insn_get_stmts(bap_insn i);
 
-//Free native pointers
+// Library Lifecycle
+
+// Free native pointers
 void bap_free(void*);
 
+// Initialize library
 void bap_init();
+
+// Thread-safety
+void bap_register_thread();
+void bap_unregister_thread();
+
+void bap_acquire();
+void bap_release();

@@ -5,6 +5,7 @@
 #include <caml/mlvalues.h>
 #include <caml/callback.h>
 #include <caml/alloc.h>
+#include <caml/threads.h>
 #include <bap_internal.h>
 #include <bap.h>
 #include <stdio.h>
@@ -592,4 +593,20 @@ char* bap_render_stmt(bap_stmt* stmt) {
 
 void bap_free(void* p) {
   free(p);
+}
+
+void bap_register_thread() {
+  caml_c_thread_register();
+}
+
+void bap_unregister_thread() {
+  caml_c_thread_unregister();
+}
+
+void bap_acquire() {
+  caml_acquire_runtime_system();
+}
+
+void bap_release() {
+  caml_release_runtime_system();
 }
