@@ -53,5 +53,7 @@ int main() {
     bap_free_disasm_insn(*cur);
   }
   free(insns);
+  bap_release();
+  assert(bap_thread_unregister());
   return 0;
 }

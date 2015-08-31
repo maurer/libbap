@@ -1,7 +1,7 @@
 all: _build/clib/libbap.so
 # OASIS_START
 # OASIS_STOP
-DEP_PACKAGES = bap core_kernel
+DEP_PACKAGES = bap core_kernel threads
 DEP_PACKAGES_FLAGS = $(foreach p, $(DEP_PACKAGES), -package $p)
 
 _build/clib:

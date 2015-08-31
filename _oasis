@@ -15,4 +15,5 @@ Library libbap
   CCOpt:      -I../lib -Wall -Werror
   CompiledObject: native
   BuildDepends: core_kernel,
-                bap
+                bap,
+                threads

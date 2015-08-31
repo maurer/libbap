@@ -40,3 +40,4 @@ let _ = Callback.register "insn_asm" Insn.asm
 let _ = Callback.register "insn_to_bils" Insn.bil
 let _ = Callback.register "array_of_list" Array.of_list
 let _ = Callback.register "size_to_bits" size_to_bits
+let _ = Thread.yield ()
