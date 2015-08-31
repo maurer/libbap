@@ -22,8 +22,8 @@ BAP_0.1 {
     bap_insn_get_stmts;
     bap_free;
     bap_init;
-    bap_register_thread;
-    bap_unregister_thread;
+    bap_thread_register;
+    bap_thread_unregister;
     bap_acquire;
     bap_release;
   local: *;

@@ -254,8 +254,8 @@ void bap_free(void*);
 void bap_init();
 
 // Thread-safety
-void bap_register_thread();
-void bap_unregister_thread();
+bool bap_thread_register();
+bool bap_thread_unregister();
 
 void bap_acquire();
 void bap_release();

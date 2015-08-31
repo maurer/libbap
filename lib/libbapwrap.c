@@ -595,12 +595,12 @@ void bap_free(void* p) {
   free(p);
 }
 
-void bap_register_thread() {
-  caml_c_thread_register();
+bool bap_thread_register() {
+  return caml_c_thread_register();
 }
 
-void bap_unregister_thread() {
-  caml_c_thread_unregister();
+bool bap_thread_unregister() {
+  return caml_c_thread_unregister();
 }
 
 void bap_acquire() {
