@@ -11,6 +11,13 @@ int main() {
   printf("%s\n", bv_str);
   free(bv_str);
 
+  bv = bap_create_bitvector64(0x0123456789ABCDEFL, 64);
+  size_t width = bap_bitvector_size(bv);
+  char* contents = bap_bitvector_contents(bv);
+  bap_free_bitvector(bv);
+  printf("%x:%d\n", *(uint64_t*)contents, width);
+  free(contents);
+
   char bs_test_str[] = "foo\0bar";
   bap_bigstring bs = bap_create_bigstring(bs_test_str, sizeof(bs_test_str));
   char bs_out_str[sizeof(bs_test_str)] = {0};

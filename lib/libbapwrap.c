@@ -26,6 +26,8 @@ NAMED_FUNC(insn_asm)
 NAMED_FUNC(insn_to_bils)
 NAMED_FUNC(array_of_list)
 NAMED_FUNC(size_to_bits)
+NAMED_FUNC(bv_size)
+NAMED_FUNC(bv_contents)
 
 static char* argv[] = { NULL };
 
@@ -44,6 +46,8 @@ void bap_init() {
   LOAD_FUNC(insn_to_bils)
   LOAD_FUNC(array_of_list)
   LOAD_FUNC(size_to_bits)
+  LOAD_FUNC(bv_size)
+  LOAD_FUNC(bv_contents)
 }
 
 bap_bigstring bap_create_bigstring(char* buf, size_t len) {
@@ -63,6 +67,23 @@ bap_bitvector bap_create_bitvector64(int64_t val, int16_t width) {
 
 char* bap_bitvector_to_string(bap_bitvector bv) {
   return strdup(String_val(caml_callback(*caml_bitvector_to_string, *bv)));
+}
+
+size_t bap_bitvector_size(bap_bitvector bv) {
+  return Int_val(caml_callback(*caml_bv_size, *bv));
+}
+
+char* bap_bitvector_contents(bap_bitvector bv) {
+  CAMLparam0 ();
+  CAMLlocal1(caml_arr);
+  caml_arr = caml_callback(*caml_bv_contents, *bv);
+  size_t arr_len = caml_array_length(caml_arr);
+  char* out = malloc(sizeof(char) * arr_len);
+  size_t i;
+  for (i = 0; i < arr_len; i++) {
+    out[i] = Field(caml_arr, i);
+  }
+  CAMLreturnT(char*, out);
 }
 
 char* bap_mem_to_string(bap_mem mem) {

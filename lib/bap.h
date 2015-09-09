@@ -213,6 +213,8 @@ size_t    bap_bigstring_length(bap_bigstring);
 size_t    bap_bigstring_to_buf(bap_bigstring, // Bigstring to project
                                char*,         // Buffer to land in
                                size_t);       // Size of provided buffer
+size_t bap_bitvector_size(bap_bitvector bv);
+char* bap_bitvector_contents(bap_bitvector bv);
 
 // Construction
 // Creates an bitvector holding the provided value and of the given width.
