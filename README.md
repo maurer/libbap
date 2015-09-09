@@ -18,6 +18,7 @@ make install
 
 ## Usage
  * Call `bap_init` before calling any function.
+
 ### Threading
 You have two basic options:
  1. Make all calls to `libbap` from the thread in which `bap_init` was initially called.
