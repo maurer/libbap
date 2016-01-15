@@ -26,9 +26,11 @@ let size_to_bits (sz : Size.t) : int =
     | `r16 -> 16
     | `r32 -> 32
     | `r64 -> 64
+    | `r128 -> 128
+    | `r256 -> 256
 
 let bv_to_bytes bv =
-  Sequence.to_array (Bitvector.to_chars bv LittleEndian)
+  Sequence.to_array (Bitvector.enum_chars bv LittleEndian)
 
 let _ = Callback.register "bigstring_of_string" bigstring_of_string
 let _ = Callback.register "bigstring_to_string" bigstring_to_string

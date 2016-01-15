@@ -4,17 +4,17 @@ foo
 bar
 00000000  31 C0 50 68 2F 2F 73 68 68 2F 62 69 6E 89 E3 50 |1.Ph//shh/bin..P|
 00000010  53 89 E1 99 B0 0B CD 80 00                      |S........       |
-xorl %eax, %eax; XOR32rr(EAX,EAX,EAX)
-pushl %eax; PUSH32r(EAX)
-pushl $0x68732f2f; PUSHi32(0x68732f2f)
-pushl $0x6e69622f; PUSHi32(0x6e69622f)
-movl %esp, %ebx; MOV32rr(EBX,ESP)
-pushl %eax; PUSH32r(EAX)
-pushl %ebx; PUSH32r(EBX)
-movl %esp, %ecx; MOV32rr(ECX,ESP)
-cltd; CDQ()
-movb $0xb, %al; MOV8ri(AL,0xb)
-int $-0x80; INT(-0x80)
+XOR32rr(EAX,EAX,EAX)
+PUSH32r(EAX)
+PUSHi32(0x68732f2f)
+PUSHi32(0x6e69622f)
+MOV32rr(EBX,ESP)
+PUSH32r(EAX)
+PUSH32r(EBX)
+MOV32rr(ECX,ESP)
+CDQ()
+MOV8ri(AL,0xb)
+INT(-0x80)
 0x0:32->0x1:32: xorl %eax, %eax
 EAX.0 : r32 <- 0x0:32
 AF.0 : r1 <- ("AF is undefined after xor" : r1)
@@ -24,27 +24,27 @@ OF.0 : r1 <- false
 CF.0 : r1 <- false
 SF.0 : r1 <- false
 0x2:32->0x2:32: pushl %eax
-t_6.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
+v6.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- t_6.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v6.tmp.0 : r32)
 0x3:32->0x7:32: pushl $0x68732f2f
-t_7.tmp.0 : r32 <- 0x68732F2F:32
+v7.tmp.0 : r32 <- 0x68732F2F:32
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- t_7.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v7.tmp.0 : r32)
 0x8:32->0xC:32: pushl $0x6e69622f
-t_8.tmp.0 : r32 <- 0x6E69622F:32
+v8.tmp.0 : r32 <- 0x6E69622F:32
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- t_8.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v8.tmp.0 : r32)
 0xD:32->0xE:32: movl %esp, %ebx
 EBX.0 : r32 <- (l:32)(ESP.0 : r32)
 0xF:32->0xF:32: pushl %eax
-t_9.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
+v9.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- t_9.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v9.tmp.0 : r32)
 0x10:32->0x10:32: pushl %ebx
-t_10.tmp.0 : r32 <- (l:32)(EBX.0 : r32)
+v10.tmp.0 : r32 <- (l:32)(EBX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- t_10.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v10.tmp.0 : r32)
 0x11:32->0x12:32: movl %esp, %ecx
 ECX.0 : r32 <- (l:32)(ESP.0 : r32)
 0x13:32->0x13:32: cltd
