@@ -32,6 +32,33 @@ let size_to_bits (sz : Size.t) : int =
 let bv_to_bytes bv =
   Sequence.to_array (Bitvector.enum_chars bv LittleEndian)
 
+let image_of_string buf =
+  match Image.of_string buf with
+    | Ok((v,_)) -> v
+    | _ -> failwith "Image failed to lift"
+
+let rec table_to_list ?(e=None) tbl =
+  match e with
+    | None -> (match Table.min tbl with
+                 | Some (m, v) -> table_to_list ~e:(Some (m, v)) tbl
+                 | None -> [])
+    | Some (m, v) -> (match Table.next tbl m with
+                     | Some (m', v') -> (m, v)::(table_to_list ~e:(Some (m', v')) tbl)
+                     | None -> [(m, v)])
+
+let segments_of_image img =
+  Table.map (Image.segments img) ~f:(fun seg ->
+    (Image.Segment.name seg,
+     Image.Segment.is_readable seg,
+     Image.Segment.is_writable seg,
+     Image.Segment.is_executable seg)) |> table_to_list
+
+let file_contents_to_raw_segments str =
+  str |> image_of_string |> segments_of_image |> List.map ~f:(fun (mem, segd) ->
+    (segd, (Memory.min_addr mem, Memory.max_addr mem, Memory.to_string mem))) |>
+    Array.of_list
+
+let _ = Callback.register "get_segments" file_contents_to_raw_segments
 let _ = Callback.register "bigstring_of_string" bigstring_of_string
 let _ = Callback.register "bigstring_to_string" bigstring_to_string
 let _ = Callback.register "mem_create" mem_create

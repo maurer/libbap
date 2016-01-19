@@ -40,6 +40,15 @@ typedef enum {
   BAP_TYPE_MEM
 } bap_type_kind;
 
+typedef struct {
+  char* name;
+  bool r, w, x;
+  bap_addr start;
+  bap_addr end;
+  char* data;
+  size_t data_len;
+} bap_segment;
+
 // All sizes are in bits. All of them. Always.
 
 typedef struct {
@@ -204,6 +213,7 @@ char*     bap_disasm_to_string(bap_disasm);
 char*     bap_bitvector_to_string(bap_bitvector);
 char*     bap_mem_to_string(bap_mem);
 char*     bap_insn_to_asm(bap_insn);
+char*     bap_render_segment(bap_segment* seg);
 
 // Projection (convert abstract types to C-native ones)
 // Determine length of a bigstring, e.g. for use with bap_bigstring_to_buf.
@@ -246,6 +256,9 @@ bap_disasm_insn** bap_disasm_get_insns(bap_disasm d);
 // Acquire the BIL description from an instruction as a null terminated array
 // Returning null indicates that the lift failed
 bap_stmt** bap_insn_get_stmts(bap_insn i);
+
+// Container functions
+bap_segment** bap_get_segments(char* buf, size_t len);
 
 // Library Lifecycle
 

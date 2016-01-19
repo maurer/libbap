@@ -6,8 +6,11 @@ BAP_0.1 {
     bap_free_bitvector;
     bap_free_bigstring;
     bap_free_insn;
+    bap_free_segment;
     bap_free_disasm_insn;
+    bap_get_segments;
     bap_render_stmt;
+    bap_render_segment;
     bap_disasm_to_string;
     bap_bitvector_to_string;
     bap_bitvector_size;

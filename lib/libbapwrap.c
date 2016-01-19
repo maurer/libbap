@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+NAMED_FUNC(get_segments)
 NAMED_FUNC(bigstring_of_string)
 NAMED_FUNC(mem_create)
 NAMED_FUNC(disassemble_mem)
@@ -33,6 +34,7 @@ static char* argv[] = { NULL };
 
 void bap_init() {
   caml_startup(argv);
+  LOAD_FUNC(get_segments)
   LOAD_FUNC(bigstring_of_string)
   LOAD_FUNC(mem_create)
   LOAD_FUNC(disassemble_mem)
@@ -48,6 +50,33 @@ void bap_init() {
   LOAD_FUNC(size_to_bits)
   LOAD_FUNC(bv_size)
   LOAD_FUNC(bv_contents)
+}
+
+bap_segment** bap_get_segments(char* buf, size_t len) {
+  value ocaml_buf = caml_alloc_string(len);
+  memcpy(String_val(ocaml_buf), buf, len);
+  value caml_segs = caml_callback(*caml_get_segments, ocaml_buf);
+  size_t seg_len = caml_array_length(caml_segs);
+  bap_segment** out = malloc(sizeof(bap_segment*) * (len + 1));
+  size_t i;
+  for (i = 0; i < seg_len; i++) {
+    out[i] = malloc(sizeof(bap_segment));
+    value entry = Field(caml_segs, i);
+    value lhs = Field(entry, 0);
+    value rhs = Field(entry, 1);
+    out[i]->name = strdup(String_val(Field(lhs, 0)));
+    out[i]->r = Bool_val(Field(lhs, 1));
+    out[i]->w = Bool_val(Field(lhs, 2));
+    out[i]->x = Bool_val(Field(lhs, 3));
+    out[i]->start = bap_alloc_bitvector(Field(rhs, 0));
+    out[i]->end = bap_alloc_bitvector(Field(rhs, 1));
+    value seg_buf = Field(rhs, 2);
+    out[i]->data_len = caml_string_length(seg_buf);
+    out[i]->data = malloc(out[i]->data_len);
+    memcpy(out[i]->data, String_val(seg_buf), out[i]->data_len);
+  }
+  out[i] = NULL;
+  return out;
 }
 
 bap_bigstring bap_create_bigstring(char* buf, size_t len) {
@@ -131,6 +160,14 @@ void bap_free_disasm_insn(bap_disasm_insn *di) {
   bap_free_bitvector(di->end);
   bap_free_insn(di->insn);
   free(di);
+}
+
+void bap_free_segment(bap_segment *seg) {
+  bap_free_bitvector(seg->start);
+  bap_free_bitvector(seg->end);
+  free(seg->data);
+  free(seg->name);
+  free(seg);
 }
 
 bap_disasm_insn** bap_disasm_get_insns(bap_disasm d) {
@@ -609,6 +646,27 @@ char* bap_render_stmt(bap_stmt* stmt) {
     default:
       asprintf(&out, "DECODE ERROR: STMT KIND %d", stmt->kind);
   }
+  return out;
+}
+
+
+char* bap_render_segment(bap_segment* seg) {
+  char* out;
+  const char* rwx;
+  switch ((seg->r << 2) | (seg->w << 1) | seg->x) {
+    case 7: rwx = "rwx"; break;
+    case 6: rwx = "rw"; break;
+    case 5: rwx = "rx"; break;
+    case 4: rwx = "r"; break;
+    case 3: rwx = "wx"; break;
+    case 2: rwx = "w"; break;
+    case 1: rwx = "x"; break;
+    case 0: rwx = ""; break;
+    default: rwx = "Internal error"; break;
+  }
+  char* start = bap_bitvector_to_string(seg->start);
+  char* end = bap_bitvector_to_string(seg->end);
+  asprintf(&out, "Name: %s\nPerms: %s\nStart: %s\nEnd: %s\n", seg->name, rwx, start, end);
   return out;
 }
 

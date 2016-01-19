@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <fcntl.h>
 
 int main() {
   bap_init();
@@ -51,7 +52,6 @@ int main() {
     free(end);
     free(asmx);
 
-    //TODO actually free
     bap_stmt** stmts = bap_insn_get_stmts((*cur)->insn);
     bap_stmt** ic;
     for (ic = stmts; *ic != NULL; ic++) {
@@ -60,6 +60,19 @@ int main() {
     bap_free_disasm_insn(*cur);
   }
   free(insns);
+  #define ELF_SIZE 7090
+  int elf_fd = open("test_elf", O_RDONLY);
+  char elf_buf[ELF_SIZE];
+  read(elf_fd, elf_buf, ELF_SIZE);
+  bap_segment** segments = bap_get_segments(elf_buf, ELF_SIZE);
+
+  bap_segment** cur_seg;
+  for (cur_seg = segments; *cur_seg != NULL; cur_seg++) {
+    printf("%s", bap_render_segment(*cur_seg));
+    bap_free_segment(*cur_seg);
+  }
+  free(segments);
+
   bap_release();
   assert(bap_thread_unregister());
   return 0;

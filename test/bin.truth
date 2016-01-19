@@ -53,3 +53,11 @@ special: Unknown Semantics
 EAX.0 : r32 <- EAX.0 : r32[31:8] ++ 0xB:8
 0x16:32->0x17:32: int $-0x80
 special: int 80
+Name: 02
+Perms: rx
+Start: 0x400000:64
+End: 0x40080B:64
+Name: 03
+Perms: rw
+Start: 0x600810:64
+End: 0x600A5F:64
