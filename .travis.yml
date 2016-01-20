@@ -2,6 +2,8 @@ language: c
 cache:
   directories:
     - $HOME/.opam
+before_cache:
+  - rm -rf $HOME/.opam/log
 script:
   - opam init -y
   - eval `opam config env`
