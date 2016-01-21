@@ -55,9 +55,10 @@ EAX.0 : r32 <- EAX.0 : r32[31:8] ++ 0xB:8
 special: int 80
 Name: 02
 Perms: rx
-Start: 0x400000:64
-End: 0x40080B:64
+Start: 0x8048000:32
+End: 0x80485E7:32
+110929c5:32
 Name: 03
 Perms: rw
-Start: 0x600810:64
-End: 0x600A5F:64
+Start: 0x80495E8:32
+End: 0x80496FB:32

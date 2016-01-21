@@ -69,6 +69,18 @@ int main() {
   bap_segment** cur_seg;
   for (cur_seg = segments; *cur_seg != NULL; cur_seg++) {
     printf("%s", bap_render_segment(*cur_seg));
+    bap_bigstring bs_seg = bap_create_bigstring((*cur_seg)->data, (*cur_seg)->data_len);
+    bap_mem mem = bap_create_mem(0, (*cur_seg)->data_len, BAP_LITTLE_ENDIAN, (*cur_seg)->start, bs_seg);
+    bap_addr* starts = bap_byteweight(BAP_X86, mem);
+    bap_addr* cur_addr;
+    for (cur_addr = starts; *cur_addr != NULL; cur_addr++) {
+      size_t width = bap_bitvector_size(*cur_addr);
+      char* contents = bap_bitvector_contents(*cur_addr);
+      bap_free_bitvector(*cur_addr);
+      printf("%x:%d\n", *(uint64_t*)contents, width);
+    }
+    bap_free_mem(mem);
+    bap_free_bigstring(bs_seg);
     bap_free_segment(*cur_seg);
   }
   free(segments);

@@ -58,6 +58,14 @@ let file_contents_to_raw_segments str =
     (segd, (Memory.min_addr mem, Memory.max_addr mem, Memory.to_string mem))) |>
     Array.of_list
 
+let byteweight (arch : arch) (mem : mem) : addr Array.t =
+  let module BW = Byteweight.Bytes in
+  let osigs = Signatures.load ~mode:"bytes" arch in
+  let sigs = Option.value_exn osigs in
+  let parsed = Binable.of_string (module BW) sigs in
+  Array.of_list (BW.find parsed mem ~length:16 ~threshold:0.5)
+
+let _ = Callback.register "byteweight" byteweight
 let _ = Callback.register "get_segments" file_contents_to_raw_segments
 let _ = Callback.register "bigstring_of_string" bigstring_of_string
 let _ = Callback.register "bigstring_to_string" bigstring_to_string

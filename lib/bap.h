@@ -19,8 +19,8 @@ typedef bap_bitvector bap_addr;
 
 //C-mode types
 typedef enum {
-  BAP_ARM = 0x93fcb9,
-  BAP_X86 = 0xb67eed,
+  BAP_ARM    = 0x93fcb9,
+  BAP_X86    = 0xb67eed,
   BAP_X86_64 = 0xba7b274f,
 } bap_arch;
 
@@ -259,6 +259,7 @@ bap_stmt** bap_insn_get_stmts(bap_insn i);
 
 // Container functions
 bap_segment** bap_get_segments(char* buf, size_t len);
+bap_addr* bap_byteweight(bap_arch arch, bap_mem mem);
 
 // Library Lifecycle
 

@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+NAMED_FUNC(byteweight)
 NAMED_FUNC(get_segments)
 NAMED_FUNC(bigstring_of_string)
 NAMED_FUNC(mem_create)
@@ -34,6 +35,7 @@ static char* argv[] = { NULL };
 
 void bap_init() {
   caml_startup(argv);
+  LOAD_FUNC(byteweight)
   LOAD_FUNC(get_segments)
   LOAD_FUNC(bigstring_of_string)
   LOAD_FUNC(mem_create)
@@ -50,6 +52,18 @@ void bap_init() {
   LOAD_FUNC(size_to_bits)
   LOAD_FUNC(bv_size)
   LOAD_FUNC(bv_contents)
+}
+
+bap_addr* bap_byteweight(bap_arch arch, bap_mem mem) {
+  value caml_addrs = caml_callback2(*caml_byteweight, arch, *mem);
+  size_t addr_count = caml_array_length(caml_addrs);
+  bap_addr* out = malloc(sizeof(bap_addr) * (addr_count + 1));
+  size_t i;
+  for (i = 0; i < addr_count; i++) {
+    out[i] = bap_alloc_bitvector(Field(caml_addrs, i));
+  }
+  out[i] = 0;
+  return out;
 }
 
 bap_segment** bap_get_segments(char* buf, size_t len) {
