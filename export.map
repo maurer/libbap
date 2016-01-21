@@ -7,9 +7,11 @@ BAP_0.1 {
     bap_free_bigstring;
     bap_free_insn;
     bap_free_segment;
+    bap_free_symbol;
     bap_free_disasm_insn;
     bap_byteweight;
     bap_get_segments;
+    bap_get_symbols;
     bap_render_stmt;
     bap_render_segment;
     bap_disasm_to_string;

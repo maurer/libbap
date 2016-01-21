@@ -78,12 +78,26 @@ int main() {
       char* contents = bap_bitvector_contents(*cur_addr);
       bap_free_bitvector(*cur_addr);
       printf("%x:%d\n", *(uint64_t*)contents, width);
+      free(contents);
     }
     bap_free_mem(mem);
     bap_free_bigstring(bs_seg);
     bap_free_segment(*cur_seg);
   }
   free(segments);
+
+  bap_symbol** symbols = bap_get_symbols(elf_buf, ELF_SIZE);
+  bap_symbol** cur_sym;
+  for (cur_sym = symbols; *cur_sym != NULL; cur_sym++) {
+    char* contents_start = bap_bitvector_contents((*cur_sym)->start);
+    char* contents_end   = bap_bitvector_contents((*cur_sym)->end);
+    printf("%s~%x:%d->%x:%d\n", (*cur_sym)->name,
+           *(uint64_t*)contents_start, bap_bitvector_size((*cur_sym)->start),
+           *(uint64_t*)contents_end,   bap_bitvector_size((*cur_sym)->end));
+    free(contents_start);
+    free(contents_end);
+    bap_free_symbol(*cur_sym);
+  }
 
   bap_release();
   assert(bap_thread_unregister());

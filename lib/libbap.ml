@@ -65,6 +65,12 @@ let byteweight (arch : arch) (mem : mem) : addr Array.t =
   let parsed = Binable.of_string (module BW) sigs in
   Array.of_list (BW.find parsed mem ~length:16 ~threshold:0.5)
 
+let file_contents_to_symbols (str : string) : (string * bool * bool * addr * addr) Array.t =
+  let module Symbol = Image.Symbol in
+  str |> image_of_string |> Image.symbols |> table_to_list |> List.map ~f:(fun(mem, sym) ->
+  (Symbol.name sym, Symbol.is_function sym, Symbol.is_debug sym, Memory.min_addr mem, Memory.max_addr mem)) |> Array.of_list
+
+let _ = Callback.register "get_symbols" file_contents_to_symbols
 let _ = Callback.register "byteweight" byteweight
 let _ = Callback.register "get_segments" file_contents_to_raw_segments
 let _ = Callback.register "bigstring_of_string" bigstring_of_string

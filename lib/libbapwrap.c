@@ -13,6 +13,7 @@
 #include <stdlib.h>
 #include <assert.h>
 
+NAMED_FUNC(get_symbols)
 NAMED_FUNC(byteweight)
 NAMED_FUNC(get_segments)
 NAMED_FUNC(bigstring_of_string)
@@ -35,6 +36,7 @@ static char* argv[] = { NULL };
 
 void bap_init() {
   caml_startup(argv);
+  LOAD_FUNC(get_symbols)
   LOAD_FUNC(byteweight)
   LOAD_FUNC(get_segments)
   LOAD_FUNC(bigstring_of_string)
@@ -52,6 +54,26 @@ void bap_init() {
   LOAD_FUNC(size_to_bits)
   LOAD_FUNC(bv_size)
   LOAD_FUNC(bv_contents)
+}
+
+bap_symbol** bap_get_symbols(char* buf, size_t len) {
+  value ocaml_buf = caml_alloc_string(len);
+  memcpy(String_val(ocaml_buf), buf, len);
+  value caml_syms = caml_callback(*caml_get_symbols, ocaml_buf);
+  size_t sym_len = caml_array_length(caml_syms);
+  bap_symbol** out = malloc(sizeof(bap_symbol*) * (len + 1));
+  size_t i;
+  for (i = 0; i < sym_len; i++) {
+    value cur = Field(caml_syms, i);
+    out[i] = malloc(sizeof(bap_symbol));
+    out[i]->name  = strdup(String_val(Field(cur, 0)));
+    out[i]->func  = Bool_val(Field(cur, 1));
+    out[i]->debug = Bool_val(Field(cur, 2));
+    out[i]->start = bap_alloc_bitvector(Field(cur, 3));
+    out[i]->end   = bap_alloc_bitvector(Field(cur, 4));
+  }
+  out[i] = NULL;
+  return out;
 }
 
 bap_addr* bap_byteweight(bap_arch arch, bap_mem mem) {
@@ -182,6 +204,13 @@ void bap_free_segment(bap_segment *seg) {
   free(seg->data);
   free(seg->name);
   free(seg);
+}
+
+void bap_free_symbol(bap_symbol *sym) {
+  bap_free_bitvector(sym->start);
+  bap_free_bitvector(sym->end);
+  free(sym->name);
+  free(sym);
 }
 
 bap_disasm_insn** bap_disasm_get_insns(bap_disasm d) {

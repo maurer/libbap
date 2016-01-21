@@ -49,6 +49,14 @@ typedef struct {
   size_t data_len;
 } bap_segment;
 
+typedef struct {
+  char* name;
+  bool func;
+  bool debug;
+  bap_addr start;
+  bap_addr end;
+} bap_symbol;
+
 // All sizes are in bits. All of them. Always.
 
 typedef struct {
@@ -205,6 +213,7 @@ typedef struct bap_stmt {
   };
 } bap_stmt;
 
+void bap_free_symbol(bap_symbol*);
 void bap_free_disasm_insn(bap_disasm_insn*);
 
 // String rendering
@@ -259,6 +268,7 @@ bap_stmt** bap_insn_get_stmts(bap_insn i);
 
 // Container functions
 bap_segment** bap_get_segments(char* buf, size_t len);
+bap_symbol** bap_get_symbols(char* buf, size_t len);
 bap_addr* bap_byteweight(bap_arch arch, bap_mem mem);
 
 // Library Lifecycle
