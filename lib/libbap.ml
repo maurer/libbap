@@ -55,7 +55,7 @@ let segments_of_image img =
 
 let file_contents_to_raw_segments str =
   str |> image_of_string |> segments_of_image |> List.map ~f:(fun (mem, segd) ->
-    (segd, (Memory.min_addr mem, Memory.max_addr mem, Memory.to_string mem))) |>
+    (segd, mem)) |>
     Array.of_list
 
 let byteweight (arch : arch) (mem : mem) : addr Array.t =

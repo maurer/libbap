@@ -99,17 +99,11 @@ bap_segment** bap_get_segments(char* buf, size_t len) {
     out[i] = malloc(sizeof(bap_segment));
     value entry = Field(caml_segs, i);
     value lhs = Field(entry, 0);
-    value rhs = Field(entry, 1);
     out[i]->name = strdup(String_val(Field(lhs, 0)));
-    out[i]->r = Bool_val(Field(lhs, 1));
-    out[i]->w = Bool_val(Field(lhs, 2));
-    out[i]->x = Bool_val(Field(lhs, 3));
-    out[i]->start = bap_alloc_bitvector(Field(rhs, 0));
-    out[i]->end = bap_alloc_bitvector(Field(rhs, 1));
-    value seg_buf = Field(rhs, 2);
-    out[i]->data_len = caml_string_length(seg_buf);
-    out[i]->data = malloc(out[i]->data_len);
-    memcpy(out[i]->data, String_val(seg_buf), out[i]->data_len);
+    out[i]->r    = Bool_val(Field(lhs, 1));
+    out[i]->w    = Bool_val(Field(lhs, 2));
+    out[i]->x    = Bool_val(Field(lhs, 3));
+    out[i]->mem  = bap_alloc_mem(Field(entry, 1));
   }
   out[i] = NULL;
   return out;
@@ -199,9 +193,7 @@ void bap_free_disasm_insn(bap_disasm_insn *di) {
 }
 
 void bap_free_segment(bap_segment *seg) {
-  bap_free_bitvector(seg->start);
-  bap_free_bitvector(seg->end);
-  free(seg->data);
+  bap_free_mem(seg->mem);
   free(seg->name);
   free(seg);
 }
@@ -751,9 +743,8 @@ char* bap_render_segment(bap_segment* seg) {
     case 0: rwx = ""; break;
     default: rwx = "Internal error"; break;
   }
-  char* start = bap_bitvector_to_string(seg->start);
-  char* end = bap_bitvector_to_string(seg->end);
-  if (asprintf(&out, "Name: %s\nPerms: %s\nStart: %s\nEnd: %s\n", seg->name, rwx, start, end) == -1) {
+  char* mem_str = bap_mem_to_string(seg->mem);
+  if (asprintf(&out, "Name: %s\tPerms: %s\nMemory:\n %s\n", seg->name, rwx, mem_str) == -1) {
     return (char*)-1;
   }
   return out;

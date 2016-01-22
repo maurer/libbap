@@ -18,13 +18,13 @@ ABSTRACT_TYPE(insn)
 typedef bap_bitvector bap_addr;
 
 //C-mode types
-typedef enum {
+typedef enum bap_arch {
   BAP_ARM    = 0x93fcb9,
   BAP_X86    = 0xb67eed,
   BAP_X86_64 = 0xba7b274f,
 } bap_arch;
 
-typedef enum {
+typedef enum bap_endian {
   BAP_LITTLE_ENDIAN = 1,
   BAP_BIG_ENDIAN = 3
 } bap_endian;
@@ -35,7 +35,7 @@ typedef struct {
   bap_insn insn;
 } bap_disasm_insn;
 
-typedef enum {
+typedef enum bap_type_kind {
   BAP_TYPE_IMM,
   BAP_TYPE_MEM
 } bap_type_kind;
@@ -43,10 +43,7 @@ typedef enum {
 typedef struct {
   char* name;
   bool r, w, x;
-  bap_addr start;
-  bap_addr end;
-  char* data;
-  size_t data_len;
+  bap_mem mem;
 } bap_segment;
 
 typedef struct {
@@ -77,7 +74,7 @@ typedef struct {
   int version;
 } bap_var;
 
-typedef enum {
+typedef enum bap_binop {
   BAP_BINOP_PLUS,
   BAP_BINOP_MINUS,
   BAP_BINOP_TIMES,
@@ -99,12 +96,12 @@ typedef enum {
   BAP_BINOP_SLE
 } bap_binop;
 
-typedef enum {
+typedef enum bap_unop {
   BAP_UNOP_NEG,
   BAP_UNOP_NOT
 } bap_unop;
 
-typedef enum {
+typedef enum bap_expr_kind {
   BAP_EXPR_LOAD,
   BAP_EXPR_STORE,
   BAP_EXPR_BINOP,
@@ -119,7 +116,7 @@ typedef enum {
   BAP_EXPR_CONCAT
 } bap_expr_kind;
 
-typedef enum {
+typedef enum bap_cast_kind {
   BAP_CAST_UNSIGNED,
   BAP_CAST_SIGNED,
   BAP_CAST_HIGH,
@@ -182,7 +179,7 @@ typedef struct bap_expr {
   };
 } bap_expr;
 
-typedef enum {
+typedef enum bap_stmt_kind {
   BAP_STMT_MOVE,
   BAP_STMT_JMP,
   BAP_STMT_SPECIAL,
@@ -215,6 +212,7 @@ typedef struct bap_stmt {
 
 void bap_free_symbol(bap_symbol*);
 void bap_free_disasm_insn(bap_disasm_insn*);
+void bap_free_segment(bap_segment*);
 
 // String rendering
 char*     bap_render_stmt(bap_stmt*);
