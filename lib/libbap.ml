@@ -70,6 +70,9 @@ let file_contents_to_symbols (str : string) : (string * bool * bool * addr * add
   str |> image_of_string |> Image.symbols |> table_to_list |> List.map ~f:(fun(mem, sym) ->
   (Symbol.name sym, Symbol.is_function sym, Symbol.is_debug sym, Memory.min_addr mem, Memory.max_addr mem)) |> Array.of_list
 
+let mem_project (mem : mem) : (addr * addr * string) = (Memory.min_addr mem, Memory.max_addr mem, Bigsubstring.to_string (Memory.to_buffer mem))
+
+let _ = Callback.register "mem_project" mem_project
 let _ = Callback.register "get_symbols" file_contents_to_symbols
 let _ = Callback.register "byteweight" byteweight
 let _ = Callback.register "get_segments" file_contents_to_raw_segments

@@ -31,6 +31,7 @@ NAMED_FUNC(array_of_list)
 NAMED_FUNC(size_to_bits)
 NAMED_FUNC(bv_size)
 NAMED_FUNC(bv_contents)
+NAMED_FUNC(mem_project)
 
 static char* argv[] = { NULL };
 
@@ -54,6 +55,7 @@ void bap_init() {
   LOAD_FUNC(size_to_bits)
   LOAD_FUNC(bv_size)
   LOAD_FUNC(bv_contents)
+  LOAD_FUNC(mem_project)
 }
 
 bap_symbol** bap_get_symbols(char* buf, size_t len) {
@@ -85,6 +87,18 @@ bap_addr* bap_byteweight(bap_arch arch, bap_mem mem) {
     out[i] = bap_alloc_bitvector(Field(caml_addrs, i));
   }
   out[i] = 0;
+  return out;
+}
+
+bap_mem_c* bap_project_mem(bap_mem mem) {
+  value caml_mem_proj = caml_callback(*caml_mem_project, *mem);
+  bap_mem_c* out = malloc(sizeof(bap_mem_c));
+  out->start = bap_alloc_bitvector(Field(caml_mem_proj, 0));
+  out->end   = bap_alloc_bitvector(Field(caml_mem_proj, 1));
+  value caml_buf = Field(caml_mem_proj, 2);
+  out->len   = caml_string_length(caml_buf);
+  out->data  = malloc(out->len);
+  memcpy(out->data, String_val(caml_buf), out->len);
   return out;
 }
 

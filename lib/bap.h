@@ -47,6 +47,13 @@ typedef struct {
 } bap_segment;
 
 typedef struct {
+  bap_addr start;
+  bap_addr end;
+  char* data;
+  size_t len;
+} bap_mem_c;
+
+typedef struct {
   char* name;
   bool func;
   bool debug;
@@ -232,6 +239,9 @@ size_t    bap_bigstring_to_buf(bap_bigstring, // Bigstring to project
                                size_t);       // Size of provided buffer
 size_t bap_bitvector_size(bap_bitvector bv);
 char* bap_bitvector_contents(bap_bitvector bv);
+
+// Project a mem object into its data and location components
+bap_mem_c* bap_project_mem(bap_mem);
 
 // Construction
 // Creates an bitvector holding the provided value and of the given width.
