@@ -16,7 +16,7 @@ int main() {
   size_t width = bap_bitvector_size(bv);
   char* contents = bap_bitvector_contents(bv);
   bap_free_bitvector(bv);
-  printf("%x:%d\n", *(uint64_t*)contents, width);
+  printf("%lx:%d\n", *(uint64_t*)contents, width);
   free(contents);
 
   char bs_test_str[] = "foo\0bar";

@@ -154,7 +154,7 @@ char* bap_bitvector_contents(bap_bitvector bv) {
   char* out = malloc(sizeof(char) * arr_len);
   size_t i;
   for (i = 0; i < arr_len; i++) {
-    out[i] = Field(caml_arr, i);
+    out[i] = Int_val(Field(caml_arr, i));
   }
   CAMLreturnT(char*, out);
 }
