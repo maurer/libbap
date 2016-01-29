@@ -61,10 +61,13 @@ int main() {
   }
   free(insns);
   #define ELF_SIZE 7090
-  int elf_fd = open("test_elf", O_RDONLY);
+  int elf_fd = open("test_elf.x86", O_RDONLY);
   char elf_buf[ELF_SIZE];
   read(elf_fd, elf_buf, ELF_SIZE);
   bap_segment** segments = bap_get_segments(elf_buf, ELF_SIZE);
+  bap_arch arch = bap_get_arch(elf_buf, ELF_SIZE);
+  printf("ARCH: %lx\n", arch);
+  close(elf_fd);
 
   bap_segment** cur_seg;
   for (cur_seg = segments; *cur_seg != NULL; cur_seg++) {
@@ -100,6 +103,14 @@ int main() {
     free(contents_end);
     bap_free_symbol(*cur_sym);
   }
+
+  #define ELF_64_SIZE 7313
+  int elf_64_fd = open("test_elf.x86_64", O_RDONLY);
+  char elf_64_buf[ELF_64_SIZE];
+  read(elf_64_fd, elf_64_buf, ELF_64_SIZE);
+  bap_arch arch_64 = bap_get_arch(elf_64_buf, ELF_64_SIZE);
+  printf("ARCH64: %lx\n", arch_64);
+  close(elf_64_fd);
 
   bap_release();
   assert(bap_thread_unregister());

@@ -32,6 +32,7 @@ NAMED_FUNC(size_to_bits)
 NAMED_FUNC(bv_size)
 NAMED_FUNC(bv_contents)
 NAMED_FUNC(mem_project)
+NAMED_FUNC(parse_arch)
 
 static char* argv[] = { NULL };
 
@@ -56,6 +57,13 @@ void bap_init() {
   LOAD_FUNC(bv_size)
   LOAD_FUNC(bv_contents)
   LOAD_FUNC(mem_project)
+  LOAD_FUNC(parse_arch)
+}
+
+bap_arch bap_get_arch(char* buf, size_t len) {
+  value ocaml_buf = caml_alloc_string(len);
+  memcpy(String_val(ocaml_buf), buf, len);
+  return caml_callback(*caml_parse_arch, ocaml_buf);
 }
 
 bap_symbol** bap_get_symbols(char* buf, size_t len) {

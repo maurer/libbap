@@ -72,6 +72,9 @@ let file_contents_to_symbols (str : string) : (string * bool * bool * addr * add
 
 let mem_project (mem : mem) : (addr * addr * string) = (Memory.min_addr mem, Memory.max_addr mem, Bigsubstring.to_string (Memory.to_buffer mem))
 
+let parse_arch (contents : string) : arch =
+  Image.arch (image_of_string contents)
+
 let _ = Callback.register "mem_project" mem_project
 let _ = Callback.register "get_symbols" file_contents_to_symbols
 let _ = Callback.register "byteweight" byteweight
@@ -91,4 +94,5 @@ let _ = Callback.register "array_of_list" Array.of_list
 let _ = Callback.register "size_to_bits" size_to_bits
 let _ = Callback.register "bv_size" Bitvector.bitwidth
 let _ = Callback.register "bv_contents" bv_to_bytes
+let _ = Callback.register "parse_arch" parse_arch
 let _ = Thread.yield ()

@@ -278,6 +278,7 @@ bap_stmt** bap_insn_get_stmts(bap_insn i);
 bap_segment** bap_get_segments(char* buf, size_t len);
 bap_symbol** bap_get_symbols(char* buf, size_t len);
 bap_addr* bap_byteweight(bap_arch arch, bap_mem mem);
+bap_arch bap_get_arch(char* buf, size_t len);
 
 // Library Lifecycle
 
