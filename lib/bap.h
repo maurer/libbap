@@ -21,7 +21,7 @@ typedef bap_bitvector bap_addr;
 typedef enum bap_arch {
   BAP_ARM    = 0x93fcb9,
   BAP_X86    = 0xb67eed,
-  BAP_X86_64 = 0xba7b274f,
+  BAP_X86_64 = 0xffffffffba7b274f,
 } bap_arch;
 
 typedef enum bap_endian {
@@ -224,6 +224,7 @@ void bap_free_segment(bap_segment*);
 // String rendering
 char*     bap_render_stmt(bap_stmt*);
 char*     bap_disasm_to_string(bap_disasm);
+char*     bap_arch_to_string(bap_arch);
 char*     bap_bitvector_to_string(bap_bitvector);
 char*     bap_mem_to_string(bap_mem);
 char*     bap_insn_to_asm(bap_insn);

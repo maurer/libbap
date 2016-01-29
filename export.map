@@ -14,6 +14,7 @@ BAP_0.1 {
     bap_get_segments;
     bap_get_symbols;
     bap_get_arch;
+    bap_arch_to_string;
     bap_render_stmt;
     bap_render_segment;
     bap_disasm_to_string;

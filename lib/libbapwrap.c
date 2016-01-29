@@ -34,6 +34,7 @@ NAMED_FUNC(bv_contents)
 NAMED_FUNC(mem_project)
 NAMED_FUNC(insn_is_call)
 NAMED_FUNC(parse_arch)
+NAMED_FUNC(arch_to_string)
 
 static char* argv[] = { NULL };
 
@@ -60,10 +61,15 @@ void bap_init() {
   LOAD_FUNC(mem_project)
   LOAD_FUNC(insn_is_call)
   LOAD_FUNC(parse_arch)
+  LOAD_FUNC(arch_to_string)
 }
 
 bool bap_insn_is_call(bap_insn i) {
   return Bool_val(caml_callback(*caml_insn_is_call, *i));
+}
+
+char* bap_arch_to_string(bap_arch arch) {
+  return strdup(String_val(caml_callback(*caml_arch_to_string, arch)));
 }
 
 bap_arch bap_get_arch(char* buf, size_t len) {

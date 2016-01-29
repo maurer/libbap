@@ -59,7 +59,7 @@ special: Unknown Semantics
 EAX.0 : r32 <- EAX.0 : r32[31:8] ++ 0xB:8
 0x18:32->0x19:32: int $-0x80 Call:0
 special: int 80
-ARCH: b67eed
+ARCH: b67eed:i386
 Name: 02	Perms: rx
 Memory:
  08048000  7F 45 4C 46 01 01 01 00 00 00 00 00 00 00 00 00 |.ELF............|
@@ -199,4 +199,4 @@ __libc_csu_init~8048430:32->8048490:32
 __libc_csu_fini~80484a0:32->80484a1:32
 _fp_hw~80484b8:32->80484bb:32
 _IO_stdin_used~80484bc:32->80484bf:32
-ARCH64: ba7b274f
+ARCH64: ffffffffba7b274f:x86_64

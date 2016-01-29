@@ -75,6 +75,9 @@ let mem_project (mem : mem) : (addr * addr * string) = (Memory.min_addr mem, Mem
 let parse_arch (contents : string) : arch =
   Image.arch (image_of_string contents)
 
+let arch_to_string (arch : arch) : string =
+  Format.asprintf "%a" Arch.pp arch
+
 let _ = Callback.register "mem_project" mem_project
 let _ = Callback.register "get_symbols" file_contents_to_symbols
 let _ = Callback.register "byteweight" byteweight
@@ -96,4 +99,5 @@ let _ = Callback.register "bv_size" Bitvector.bitwidth
 let _ = Callback.register "bv_contents" bv_to_bytes
 let _ = Callback.register "insn_is_call" Insn.is_call
 let _ = Callback.register "parse_arch" parse_arch
+let _ = Callback.register "arch_to_string" arch_to_string
 let _ = Thread.yield ()

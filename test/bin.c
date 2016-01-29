@@ -67,7 +67,9 @@ int main() {
   read(elf_fd, elf_buf, ELF_SIZE);
   bap_segment** segments = bap_get_segments(elf_buf, ELF_SIZE);
   bap_arch arch = bap_get_arch(elf_buf, ELF_SIZE);
-  printf("ARCH: %lx\n", arch);
+  char* arch_string = bap_arch_to_string(arch);
+  printf("ARCH: %lx:%s\n", arch, arch_string);
+  free(arch_string);
   close(elf_fd);
 
   bap_segment** cur_seg;
@@ -110,7 +112,9 @@ int main() {
   char elf_64_buf[ELF_64_SIZE];
   read(elf_64_fd, elf_64_buf, ELF_64_SIZE);
   bap_arch arch_64 = bap_get_arch(elf_64_buf, ELF_64_SIZE);
-  printf("ARCH64: %lx\n", arch_64);
+  char* arch_64_string = bap_arch_to_string(arch_64);
+  printf("ARCH64: %lx:%s\n", arch_64, arch_64_string);
+  free(arch_64_string);
   close(elf_64_fd);
 
   bap_release();
