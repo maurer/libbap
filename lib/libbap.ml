@@ -94,5 +94,6 @@ let _ = Callback.register "array_of_list" Array.of_list
 let _ = Callback.register "size_to_bits" size_to_bits
 let _ = Callback.register "bv_size" Bitvector.bitwidth
 let _ = Callback.register "bv_contents" bv_to_bytes
+let _ = Callback.register "insn_is_call" Insn.is_call
 let _ = Callback.register "parse_arch" parse_arch
 let _ = Thread.yield ()

@@ -273,6 +273,8 @@ bap_disasm_insn** bap_disasm_get_insns(bap_disasm d);
 // Acquire the BIL description from an instruction as a null terminated array
 // Returning null indicates that the lift failed
 bap_stmt** bap_insn_get_stmts(bap_insn i);
+// Answer whether insn is a call
+bool bap_insn_is_call(bap_insn i);
 
 // Container functions
 bap_segment** bap_get_segments(char* buf, size_t len);

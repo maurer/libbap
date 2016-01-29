@@ -22,6 +22,7 @@ BAP_0.1 {
     bap_bitvector_contents;
     bap_mem_to_string;
     bap_insn_to_asm;
+    bap_insn_is_call;
     bap_bigstring_length;
     bap_bigstring_to_buf;
     bap_create_bitvector64;

@@ -29,7 +29,7 @@ int main() {
   printf("%s\n", bs_out_str + 4);
 
   bap_bitvector addr0 = bap_create_bitvector64(0, 32);
-  char shellcode[] = "\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80";
+  char shellcode[] = "\xff\xd0\x31\xc0\x50\x68//sh\x68/bin\x89\xe3\x50\x53\x89\xe1\x99\xb0\x0b\xcd\x80";
   bap_bigstring bs_shellcode = bap_create_bigstring(shellcode, sizeof(shellcode));
   bap_mem mem = bap_create_mem(0, sizeof(shellcode), BAP_LITTLE_ENDIAN, addr0, bs_shellcode);
   bap_free_bitvector(addr0);
@@ -47,7 +47,8 @@ int main() {
     char* start = bap_bitvector_to_string((*cur)->start);
     char* end   = bap_bitvector_to_string((*cur)->end);
     char* asmx  = bap_insn_to_asm((*cur)->insn);
-    printf("%s->%s: %s\n", start, end, asmx);
+    bool call = bap_insn_is_call((*cur)->insn);
+    printf("%s->%s: %s Call:%d\n", start, end, asmx, call);
     free(start);
     free(end);
     free(asmx);
