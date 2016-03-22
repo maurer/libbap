@@ -200,3 +200,19 @@ __libc_csu_fini~80484a0:32->80484a1:32
 _fp_hw~80484b8:32->80484bb:32
 _IO_stdin_used~80484bc:32->80484bf:32
 ARCH64: ffffffffba7b274f:x86_64
+ARCH_ARM: 4b1768bb:armv7
+00000000: f8 43 2d e9 4c 50 9f e5 00 STMDB_UPD(SP,SP,0xe,Nil,R3,R4,R5,R6,R7,R8,R9,LR)
+LDRi12(R5,PC,0x4c,0xe,Nil)
+0x0:32->0x3:32: push {r3, r4, r5, r6, r7, r8, r9, lr} Call:0
+v16.tmp.0 : r32 <- SP.0 : r32
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFFC:32~32:el] <- LR.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFF8:32~32:el] <- R9.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFF4:32~32:el] <- R8.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFF0:32~32:el] <- R7.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFEC:32~32:el] <- R6.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFE8:32~32:el] <- R5.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFE4:32~32:el] <- R4.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFE0:32~32:el] <- R3.0 : r32)
+SP.0 : r32 <- SP.0 : r32 - 0x20:32
+0x4:32->0x7:32: ldr r5, [pc, #76] Call:0
+R5.0 : r32 <- mem.0 : mem[32:32][0xC:32 + 0x4C:32~32:el]

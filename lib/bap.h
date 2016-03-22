@@ -19,7 +19,7 @@ typedef bap_bitvector bap_addr;
 
 //C-mode types
 typedef enum bap_arch {
-  BAP_ARM    = 0x93fcb9,
+  BAP_ARM    = 0x4b1768bb,
   BAP_X86    = 0xb67eed,
   BAP_X86_64 = 0xffffffffba7b274f,
 } bap_arch;

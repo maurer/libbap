@@ -4,6 +4,53 @@
 #include <stdlib.h>
 #include <fcntl.h>
 
+void arm_sub() {
+  #define ELF_ARM_SIZE 6818
+  int arm_fd = open("nop.arm", O_RDONLY);
+  char arm_buf[ELF_ARM_SIZE];
+  read(arm_fd, arm_buf, ELF_ARM_SIZE);
+  bap_arch arch_arm = bap_get_arch(arm_buf, ELF_ARM_SIZE);
+  char* arch_arm_string = bap_arch_to_string(arch_arm);
+  printf("ARCH_ARM: %lx:%s\n", arch_arm, arch_arm_string);
+  free(arch_arm_string);
+  close(arm_fd);
+
+  bap_bitvector addr0 = bap_create_bitvector64(0, 32);
+  char shellcode[] = "\xf8\x43\x2d\xe9\x4c\x50\x9f\xe5";
+  bap_bigstring bs_shellcode = bap_create_bigstring(shellcode, sizeof(shellcode));
+  bap_mem mem = bap_create_mem(0, sizeof(shellcode), BAP_LITTLE_ENDIAN, addr0, bs_shellcode);
+  bap_free_bitvector(addr0);
+  char* mem_str = bap_mem_to_string(mem);
+  printf("%s", mem_str);
+  free(mem_str);
+  bap_disasm d = bap_disasm_mem(NULL, BAP_ARM, mem);
+  bap_free_mem(mem);
+  char* disas_str = bap_disasm_to_string(d);
+  printf("%s", disas_str);
+  free(disas_str);
+  bap_disasm_insn** insns = bap_disasm_get_insns(d);
+  bap_disasm_insn** cur;
+  for (cur = insns; *cur != NULL; cur++) {
+    char* start = bap_bitvector_to_string((*cur)->start);
+    char* end   = bap_bitvector_to_string((*cur)->end);
+    char* asmx  = bap_insn_to_asm((*cur)->insn);
+    bool call = bap_insn_is_call((*cur)->insn);
+    printf("%s->%s: %s Call:%d\n", start, end, asmx, call);
+    free(start);
+    free(end);
+    free(asmx);
+
+    bap_stmt** stmts = bap_insn_get_stmts((*cur)->insn);
+    bap_stmt** ic;
+    for (ic = stmts; *ic != NULL; ic++) {
+      printf("%s\n", bap_render_stmt(*ic));
+    }
+    bap_free_disasm_insn(*cur);
+  }
+  free(insns);
+  #
+}
+
 int main() {
   bap_init();
   bap_bitvector bv = bap_create_bitvector64(34L, 8);
@@ -116,6 +163,8 @@ int main() {
   printf("ARCH64: %lx:%s\n", arch_64, arch_64_string);
   free(arch_64_string);
   close(elf_64_fd);
+
+  arm_sub();
 
   bap_release();
   assert(bap_thread_unregister());
