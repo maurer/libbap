@@ -7,7 +7,7 @@ before_cache:
 script:
   - opam init -y
   - eval `opam config env`
-  - opam pin add bap --dev-repo -y
+  - opam pin add bap git://github.com/maurer/bap#0.9.9 -y
   - opam install -y oasis
   - oasis setup
   - make
