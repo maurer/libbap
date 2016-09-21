@@ -16,4 +16,6 @@ Library libbap
   CompiledObject: native
   BuildDepends: core_kernel,
                 bap,
+                bap-byteweight,
+                findlib.dynload,
                 threads

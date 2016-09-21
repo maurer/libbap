@@ -5,8 +5,7 @@ LDFLAGS=-L$(LIBDIR) -lbap -Wl,-rpath,$(LIBDIR)
 all: test
 
 test: bin.out bin.truth
-	cat bin.out
 	diff -a $^
 
 bin.out: bin
-	./$< > $@
+	./$< | tee $@

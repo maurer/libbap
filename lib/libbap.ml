@@ -1,5 +1,6 @@
 open Core_kernel.Std
 open Bap.Std
+open Bap_plugins.Std
 
 let bitvector_of_int64 width v = Bitvector.of_int64 ~width v
 let bigstring_of_string pos len s = Bigstring.of_string ~pos ~len s
@@ -10,7 +11,7 @@ let mem_create pos len endian addr bs =
       Ok(v) -> v
     | _     -> failwith "mem_create failed"
 let disassemble_mem root_arr arch mem =
-  disassemble ~roots:(Array.to_list root_arr) arch mem
+  ok_exn (Disasm.of_mem ~rooter:(Rooter.create (Array.to_sequence root_arr)) arch mem)
 
 let disasm_to_string d =
   Seq.fold (Disasm.insns d) ~init:"" ~f:(fun s (_, insn) ->
@@ -59,9 +60,9 @@ let file_contents_to_raw_segments str =
     Array.of_list
 
 let byteweight (arch : arch) (mem : mem) : addr Array.t =
-  let module BW = Byteweight.Bytes in
-  let osigs = Signatures.load ~mode:"bytes" arch in
-  let sigs = Option.value_exn osigs in
+  let module BW = Bap_byteweight.Bytes in
+  let osigs = Bap_byteweight_signatures.load ~mode:"bytes" arch in
+  let sigs = Option.value_exn (Result.ok osigs) in
   let parsed = Binable.of_string (module BW) sigs in
   Array.of_list (BW.find parsed mem ~length:16 ~threshold:0.5)
 
@@ -77,6 +78,10 @@ let parse_arch (contents : string) : arch =
 
 let arch_to_string (arch : arch) : string =
   Format.asprintf "%a" Arch.pp arch
+
+let plugin_init () =
+  Log.start ();
+  Plugins.run ~don't_setup_handlers:true ()
 
 let _ = Callback.register "mem_project" mem_project
 let _ = Callback.register "get_symbols" file_contents_to_symbols
@@ -97,7 +102,8 @@ let _ = Callback.register "array_of_list" Array.of_list
 let _ = Callback.register "size_to_bits" size_to_bits
 let _ = Callback.register "bv_size" Bitvector.bitwidth
 let _ = Callback.register "bv_contents" bv_to_bytes
-let _ = Callback.register "insn_is_call" Insn.is_call
+let _ = Callback.register "insn_is_call" (Insn.is Insn.call)
 let _ = Callback.register "parse_arch" parse_arch
 let _ = Callback.register "arch_to_string" arch_to_string
+let _ = Callback.register "plugin_init" plugin_init
 let _ = Thread.yield ()

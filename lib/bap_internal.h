@@ -11,7 +11,7 @@
 //Abstract types
 #define ABSTRACT_TYPE(name) \
   typedef value* bap_##name; \
-  void inline bap_free_##name(bap_##name ptr) { \
+  void bap_free_##name(bap_##name ptr) { \
     caml_remove_global_root(ptr); \
     free(ptr); \
   } \

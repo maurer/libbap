@@ -35,8 +35,9 @@ NAMED_FUNC(mem_project)
 NAMED_FUNC(insn_is_call)
 NAMED_FUNC(parse_arch)
 NAMED_FUNC(arch_to_string)
+NAMED_FUNC(plugin_init)
 
-static char* argv[] = { NULL };
+static char* argv[] = { "bap", NULL };
 
 void bap_init() {
   caml_startup(argv);
@@ -62,6 +63,9 @@ void bap_init() {
   LOAD_FUNC(insn_is_call)
   LOAD_FUNC(parse_arch)
   LOAD_FUNC(arch_to_string)
+  LOAD_FUNC(plugin_init)
+
+  caml_callback(*caml_plugin_init, 0);
 }
 
 bool bap_insn_is_call(bap_insn i) {

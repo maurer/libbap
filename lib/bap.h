@@ -6,7 +6,7 @@
 //Abstract types
 #define ABSTRACT_TYPE(name) \
   typedef void* bap_##name; \
-  void inline bap_free_##name(bap_##name);
+  void bap_free_##name(bap_##name);
 
 ABSTRACT_TYPE(disasm)
 ABSTRACT_TYPE(mem)

@@ -4,23 +4,23 @@ foo
 bar
 00000000  FF D0 31 C0 50 68 2F 2F 73 68 68 2F 62 69 6E 89 |..1.Ph//shh/bin.|
 00000010  E3 50 53 89 E1 99 B0 0B CD 80 00                |.PS........     |
-CALL32r(EAX)
-XOR32rr(EAX,EAX,EAX)
-PUSH32r(EAX)
-PUSHi32(0x68732f2f)
-PUSHi32(0x6e69622f)
-MOV32rr(EBX,ESP)
-PUSH32r(EAX)
-PUSH32r(EBX)
-MOV32rr(ECX,ESP)
-CDQ()
-MOV8ri(AL,0xb)
-INT(-0x80)
+calll *%eax
+xorl %eax, %eax
+pushl %eax
+pushl $0x68732f2f
+pushl $0x6e69622f
+movl %esp, %ebx
+pushl %eax
+pushl %ebx
+movl %esp, %ecx
+cltd
+movb $0xb, %al
+int $0x80
 0x0:32->0x1:32: calll *%eax Call:1
-v8.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
+v7.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
 mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- 0x2:32)
-jmp v8.tmp.0 : r32
+jmp v7.tmp.0 : r32
 0x2:32->0x3:32: xorl %eax, %eax Call:0
 EAX.0 : r32 <- 0x0:32
 AF.0 : r1 <- ("AF is undefined after xor" : r1)
@@ -30,34 +30,34 @@ OF.0 : r1 <- false
 CF.0 : r1 <- false
 SF.0 : r1 <- false
 0x4:32->0x4:32: pushl %eax Call:0
-v9.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
+v2.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v9.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v2.tmp.0 : r32)
 0x5:32->0x9:32: pushl $0x68732f2f Call:0
-v10.tmp.0 : r32 <- 0x68732F2F:32
+v3.tmp.0 : r32 <- 0x68732F2F:32
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v10.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v3.tmp.0 : r32)
 0xA:32->0xE:32: pushl $0x6e69622f Call:0
-v11.tmp.0 : r32 <- 0x6E69622F:32
+v4.tmp.0 : r32 <- 0x6E69622F:32
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v11.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v4.tmp.0 : r32)
 0xF:32->0x10:32: movl %esp, %ebx Call:0
-EBX.0 : r32 <- (l:32)(ESP.0 : r32)
+EBX.0 : r32 <- ESP.0 : r32
 0x11:32->0x11:32: pushl %eax Call:0
-v12.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
+v5.tmp.0 : r32 <- (l:32)(EAX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v12.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v5.tmp.0 : r32)
 0x12:32->0x12:32: pushl %ebx Call:0
-v13.tmp.0 : r32 <- (l:32)(EBX.0 : r32)
+v6.tmp.0 : r32 <- (l:32)(EBX.0 : r32)
 ESP.0 : r32 <- ESP.0 : r32 - 0x4:32
-mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v13.tmp.0 : r32)
+mem32.0 : mem[32:8] <- (mem32.0 : mem[32:8][ESP.0 : r32~32:el] <- v6.tmp.0 : r32)
 0x13:32->0x14:32: movl %esp, %ecx Call:0
-ECX.0 : r32 <- (l:32)(ESP.0 : r32)
+ECX.0 : r32 <- ESP.0 : r32
 0x15:32->0x15:32: cltd Call:0
 special: Unknown Semantics
 0x16:32->0x17:32: movb $0xb, %al Call:0
-EAX.0 : r32 <- EAX.0 : r32[31:8] ++ 0xB:8
-0x18:32->0x19:32: int $-0x80 Call:0
+EAX.0 : r32 <- (h:24)(EAX.0 : r32) ++ 0xB:8
+0x18:32->0x19:32: int $0x80 Call:0
 special: int 80
 ARCH: b67eed:i386
 Name: 02	Perms: rx
@@ -197,22 +197,20 @@ f~80483eb:32->80483f4:32
 main~80483f5:32->8048428:32
 __libc_csu_init~8048430:32->8048490:32
 __libc_csu_fini~80484a0:32->80484a1:32
-_fp_hw~80484b8:32->80484bb:32
-_IO_stdin_used~80484bc:32->80484bf:32
 ARCH64: ffffffffba7b274f:x86_64
 ARCH_ARM: 4b1768bb:armv7
-00000000: f8 43 2d e9 4c 50 9f e5 00 STMDB_UPD(SP,SP,0xe,Nil,R3,R4,R5,R6,R7,R8,R9,LR)
-LDRi12(R5,PC,0x4c,0xe,Nil)
+00000000: f8 43 2d e9 4c 50 9f e5 00 push {r3, r4, r5, r6, r7, r8, r9, lr}
+ldr r5, [pc, #0x4c]
 0x0:32->0x3:32: push {r3, r4, r5, r6, r7, r8, r9, lr} Call:0
-v16.tmp.0 : r32 <- SP.0 : r32
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFFC:32~32:el] <- LR.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFF8:32~32:el] <- R9.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFF4:32~32:el] <- R8.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFF0:32~32:el] <- R7.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFEC:32~32:el] <- R6.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFE8:32~32:el] <- R5.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFE4:32~32:el] <- R4.0 : r32)
-mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v16.tmp.0 : r32 + 0xFFFFFFE0:32~32:el] <- R3.0 : r32)
+v8.tmp.0 : r32 <- SP.0 : r32
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFFC:32~32:el] <- LR.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFF8:32~32:el] <- R9.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFF4:32~32:el] <- R8.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFF0:32~32:el] <- R7.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFEC:32~32:el] <- R6.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFE8:32~32:el] <- R5.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFE4:32~32:el] <- R4.0 : r32)
+mem.0 : mem[32:32] <- (mem.0 : mem[32:32][v8.tmp.0 : r32 + 0xFFFFFFE0:32~32:el] <- R3.0 : r32)
 SP.0 : r32 <- SP.0 : r32 - 0x20:32
-0x4:32->0x7:32: ldr r5, [pc, #76] Call:0
+0x4:32->0x7:32: ldr r5, [pc, #0x4c] Call:0
 R5.0 : r32 <- mem.0 : mem[32:32][0xC:32 + 0x4C:32~32:el]

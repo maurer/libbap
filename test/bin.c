@@ -3,12 +3,15 @@
 #include <assert.h>
 #include <stdlib.h>
 #include <fcntl.h>
+#include <unistd.h>
+#include <assert.h>
 
 void arm_sub() {
   #define ELF_ARM_SIZE 6818
   int arm_fd = open("nop.arm", O_RDONLY);
   char arm_buf[ELF_ARM_SIZE];
-  read(arm_fd, arm_buf, ELF_ARM_SIZE);
+  size_t elf_arm_read = read(arm_fd, arm_buf, ELF_ARM_SIZE);
+  assert(elf_arm_read == ELF_ARM_SIZE);
   bap_arch arch_arm = bap_get_arch(arm_buf, ELF_ARM_SIZE);
   char* arch_arm_string = bap_arch_to_string(arch_arm);
   printf("ARCH_ARM: %lx:%s\n", arch_arm, arch_arm_string);
@@ -52,6 +55,7 @@ void arm_sub() {
 }
 
 int main() {
+  setbuf(stdout, NULL);
   bap_init();
   bap_bitvector bv = bap_create_bitvector64(34L, 8);
   char* bv_str = bap_bitvector_to_string(bv);
@@ -63,7 +67,7 @@ int main() {
   size_t width = bap_bitvector_size(bv);
   char* contents = bap_bitvector_contents(bv);
   bap_free_bitvector(bv);
-  printf("%lx:%d\n", *(uint64_t*)contents, width);
+  printf("%lx:%zu\n", *(uint64_t*)contents, width);
   free(contents);
 
   char bs_test_str[] = "foo\0bar";
@@ -108,10 +112,11 @@ int main() {
     bap_free_disasm_insn(*cur);
   }
   free(insns);
-  #define ELF_SIZE 7090
+  #define ELF_SIZE 4924
   int elf_fd = open("test_elf.x86", O_RDONLY);
   char elf_buf[ELF_SIZE];
-  read(elf_fd, elf_buf, ELF_SIZE);
+  size_t elf_read = read(elf_fd, elf_buf, ELF_SIZE);
+  assert(elf_read == ELF_SIZE);
   bap_segment** segments = bap_get_segments(elf_buf, ELF_SIZE);
   bap_arch arch = bap_get_arch(elf_buf, ELF_SIZE);
   char* arch_string = bap_arch_to_string(arch);
@@ -134,7 +139,7 @@ int main() {
       size_t width = bap_bitvector_size(*cur_addr);
       char* contents = bap_bitvector_contents(*cur_addr);
       bap_free_bitvector(*cur_addr);
-      printf("%x:%d\n", *(uint64_t*)contents, width);
+      printf("%x:%zu\n", *(uint32_t*)contents, width);
       free(contents);
     }
     bap_free_segment(*cur_seg);
@@ -146,9 +151,9 @@ int main() {
   for (cur_sym = symbols; *cur_sym != NULL; cur_sym++) {
     char* contents_start = bap_bitvector_contents((*cur_sym)->start);
     char* contents_end   = bap_bitvector_contents((*cur_sym)->end);
-    printf("%s~%x:%d->%x:%d\n", (*cur_sym)->name,
-           *(uint64_t*)contents_start, bap_bitvector_size((*cur_sym)->start),
-           *(uint64_t*)contents_end,   bap_bitvector_size((*cur_sym)->end));
+    printf("%s~%x:%zu->%lx:%zu\n", (*cur_sym)->name,
+           *(uint32_t*)contents_start, bap_bitvector_size((*cur_sym)->start),
+           *(uint32_t*)contents_end,   bap_bitvector_size((*cur_sym)->end));
     free(contents_start);
     free(contents_end);
     bap_free_symbol(*cur_sym);
@@ -157,7 +162,8 @@ int main() {
   #define ELF_64_SIZE 7313
   int elf_64_fd = open("test_elf.x86_64", O_RDONLY);
   char elf_64_buf[ELF_64_SIZE];
-  read(elf_64_fd, elf_64_buf, ELF_64_SIZE);
+  size_t elf_64_read = read(elf_64_fd, elf_64_buf, ELF_64_SIZE);
+  assert(elf_64_read == ELF_64_SIZE);
   bap_arch arch_64 = bap_get_arch(elf_64_buf, ELF_64_SIZE);
   char* arch_64_string = bap_arch_to_string(arch_64);
   printf("ARCH64: %lx:%s\n", arch_64, arch_64_string);
