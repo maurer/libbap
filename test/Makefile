@@ -1,6 +1,7 @@
-CFLAGS=-I../lib/
-LIBDIR=../_build/clib
-LDFLAGS=-L$(LIBDIR) -lbap -Wl,-rpath,$(LIBDIR)
+CFLAGS+=-I../lib/
+LIBDIR=$(shell realpath ../_build/clib)
+LDFLAGS+=-L$(LIBDIR) -Wl,-rpath,$(LIBDIR)
+LDLIBS=-lbap
 
 all: test
 

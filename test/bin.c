@@ -151,7 +151,7 @@ int main() {
   for (cur_sym = symbols; *cur_sym != NULL; cur_sym++) {
     char* contents_start = bap_bitvector_contents((*cur_sym)->start);
     char* contents_end   = bap_bitvector_contents((*cur_sym)->end);
-    printf("%s~%x:%zu->%lx:%zu\n", (*cur_sym)->name,
+    printf("%s~%x:%zu->%x:%zu\n", (*cur_sym)->name,
            *(uint32_t*)contents_start, bap_bitvector_size((*cur_sym)->start),
            *(uint32_t*)contents_end,   bap_bitvector_size((*cur_sym)->end));
     free(contents_start);

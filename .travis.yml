@@ -7,11 +7,10 @@ before_cache:
 script:
   - opam init -y
   - eval `opam config env`
-  - travis_wait opam pin add bap git://github.com/BinaryAnalysisPlatform/bap -y
+  - opam pin add bap git://github.com/maurer/bap#stable -y
   - opam install -y oasis
   - oasis setup
-  - make
-  - make test
+  - make check
 sudo: false
 addons:
   apt:
@@ -25,6 +24,7 @@ addons:
     - libcurl4-gnutls-dev
     - libgmp-dev
     - libssl-dev
+    - realpath
     - libzip-dev
     - llvm
     - llvm-3.4-dev
@@ -39,3 +39,4 @@ addons:
     - opam
     - aspcud
     - dejagnu
+    - elfutils
