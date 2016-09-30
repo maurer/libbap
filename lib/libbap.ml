@@ -1,6 +1,5 @@
 open Core_kernel.Std
 open Bap.Std
-open Bap_plugins.Std
 
 let bitvector_of_int64 width v = Bitvector.of_int64 ~width v
 let bigstring_of_string pos len s = Bigstring.of_string ~pos ~len s
@@ -33,10 +32,7 @@ let size_to_bits (sz : Size.t) : int =
 let bv_to_bytes bv =
   Sequence.to_array (Bitvector.enum_chars bv LittleEndian)
 
-let image_of_string buf =
-  match Image.of_string buf with
-    | Ok((v,_)) -> v
-    | _ -> failwith "Image failed to lift"
+let image_of_string buf = fst (ok_exn (Image.of_string buf))
 
 let rec table_to_list ?(e=None) tbl =
   match e with
@@ -79,10 +75,6 @@ let parse_arch (contents : string) : arch =
 let arch_to_string (arch : arch) : string =
   Format.asprintf "%a" Arch.pp arch
 
-let plugin_init () =
-  Log.start ();
-  Plugins.run ~don't_setup_handlers:true ()
-
 let _ = Callback.register "mem_project" mem_project
 let _ = Callback.register "get_symbols" file_contents_to_symbols
 let _ = Callback.register "byteweight" byteweight
@@ -105,5 +97,4 @@ let _ = Callback.register "bv_contents" bv_to_bytes
 let _ = Callback.register "insn_is_call" (Insn.is Insn.call)
 let _ = Callback.register "parse_arch" parse_arch
 let _ = Callback.register "arch_to_string" arch_to_string
-let _ = Callback.register "plugin_init" plugin_init
 let _ = Thread.yield ()

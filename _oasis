@@ -17,5 +17,8 @@ Library libbap
   BuildDepends: core_kernel,
                 bap,
                 bap-byteweight,
-                findlib.dynload,
+                bap-plugin-arm,
+                bap-plugin-byteweight,
+                bap-plugin-llvm,
+                bap-plugin-x86,
                 threads
