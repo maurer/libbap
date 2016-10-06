@@ -20,6 +20,7 @@ NAMED_FUNC(bigstring_of_string)
 NAMED_FUNC(mem_create)
 NAMED_FUNC(disassemble_mem)
 NAMED_FUNC(bitvector_of_int64)
+NAMED_FUNC(bitvector_of_buf)
 NAMED_FUNC(bitvector_to_string)
 NAMED_FUNC(bigstring_to_string)
 NAMED_FUNC(mem_to_string)
@@ -47,6 +48,7 @@ void bap_init() {
   LOAD_FUNC(mem_create)
   LOAD_FUNC(disassemble_mem)
   LOAD_FUNC(bitvector_of_int64)
+  LOAD_FUNC(bitvector_of_buf)
   LOAD_FUNC(bitvector_to_string)
   LOAD_FUNC(bigstring_to_string)
   LOAD_FUNC(mem_to_string)
@@ -150,6 +152,14 @@ bap_bigstring bap_create_bigstring(char* buf, size_t len) {
   return bap_alloc_bigstring(caml_callback3(*caml_bigstring_of_string,
                                             Val_int(0), Val_int(len),
                                             ocaml_string));
+}
+
+bap_bitvector bap_create_bitvector(int16_t width, size_t len, char* buf) {
+  value ocaml_buf = caml_alloc_string(len);
+  memcpy(String_val(ocaml_buf), buf, len);
+  return bap_alloc_bitvector(caml_callback2(*caml_bitvector_of_buf,
+                                            Val_int(width),
+                                            ocaml_buf));
 }
 
 bap_bitvector bap_create_bitvector64(int64_t val, int16_t width) {

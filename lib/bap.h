@@ -245,6 +245,7 @@ char* bap_bitvector_contents(bap_bitvector bv);
 bap_mem_c* bap_project_mem(bap_mem);
 
 // Construction
+bap_bitvector bap_create_bitvector(int16_t width, size_t len, char* buf);
 // Creates an bitvector holding the provided value and of the given width.
 // The width is given in bits.
 // If the width is shorter than 64, the value will be truncated.

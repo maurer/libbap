@@ -63,6 +63,14 @@ int main() {
   printf("%s\n", bv_str);
   free(bv_str);
 
+  uint64_t buf[] = {0x0123456789ABCDEFL, 0xFEDCBA9876543210L};
+  bap_bitvector bvb = bap_create_bitvector(128, 16, buf);
+  char* bvb_str = bap_bitvector_to_string(bvb);
+  bap_free_bitvector(bvb);
+  printf("%s\n", bvb_str);
+  free(bvb_str);
+
+
   bv = bap_create_bitvector64(0x0123456789ABCDEFL, 64);
   size_t width = bap_bitvector_size(bv);
   char* contents = bap_bitvector_contents(bv);
