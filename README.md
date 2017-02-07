@@ -1,3 +1,9 @@
+# DEPRECATED
+This was an ad-hoc re-exporting of BAP.
+The project now provides an official set of C bindings, which, while not stable yet, are more stable than these were.
+
+tl;dr go use [bap-bindings](https://github.com/BinaryAnalysisPlatform/bap-bindings), this is no longer maintained
+
 # libbap
 C Bindings for [BAP](https://github.com/BinaryAnalysisPlatform/bap)
 
